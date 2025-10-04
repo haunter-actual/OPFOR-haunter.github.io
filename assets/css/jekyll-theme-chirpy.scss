@@ -1,8 +1,7 @@
 ---
-# Front matter so Jekyll processes this file
 ---
 
-@import "jekyll-theme-chirpy";
+@import "{{ site.theme }}";
 
 /* Your custom CSS below */
 body {
