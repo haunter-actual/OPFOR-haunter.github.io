@@ -16,7 +16,7 @@ timezone: America/Los_Angeles
 
 title: OpposingForce # the main title
 
-tagline: haunter's SecOps stuff # it will display as the subtitle
+tagline: I Have No stdout, and I Must Stream # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
   haunter's SecOps blog focused on offensive security / red team / pentesting methodology, CTF writeups, & cybersecurity in general
