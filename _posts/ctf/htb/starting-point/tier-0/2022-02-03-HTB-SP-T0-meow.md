@@ -19,7 +19,7 @@ As this is the first in a series of introductory HTB Starting Point machines, I 
 	1. `Telnet` to the target. <br/>
 	2. login as `root`.<br/>
 	3. `cat` flag.<br/>
-	4. <figure><img src='/assets/img/ctf/htb/sp/tier0/meow/leo.jpg'/><figcaption>[PANICKED SCREECHING NOISES]</figcaption></figure>
+	4. ![Leo]](/assets/img/ctf/htb/sp/tier0/meow/leo.jpg)<figcaption>[PANICKED SCREECHING NOISES]</figcaption></figure>
 </details>
 
 ## Establishing a Connection
