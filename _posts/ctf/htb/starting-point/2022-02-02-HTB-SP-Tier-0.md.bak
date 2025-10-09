@@ -1,0 +1,15 @@
+---
+layout: post
+title: "HackTheBox Starting Point: Tier 0"
+date: 2022-02-02
+categories: RedOps ctf HTB
+tags: ctf htb RedOps writeup very_easy
+---
+<img src='/assets/img/ctf/htb/sp/tier0/tier0banner.PNG' style='display:block;' >
+## Target Systems
+1. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-meow/'>Meow</a>
+2. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-Fawn/'>Fawn</a>
+3. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-Dancing'>Dancing</a>
+5. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-Redeemer'>Redeemer</a>
+6. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-Explosion'>Explosion</a>
+7. <a href='https://opfor-haunter.github.io/posts/HTB-SP-T0-Preignition'>Preignition</a>
