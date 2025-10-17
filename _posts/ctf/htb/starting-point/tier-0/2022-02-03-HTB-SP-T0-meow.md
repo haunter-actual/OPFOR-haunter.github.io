@@ -1,8 +1,8 @@
 ---
-title: "HTB Starting Point - Tier 0 - Meow"
+title: "HackTheBox - Starting Point - Tier 0 - Very Easy - Meow"
 date: 2022-02-03 00:00:00 -0700
-categories: [ctf,htb,starting-point,tier-0]
-tags: [ctf, htb, RedOps, writeup, very_easy, telnet, meow]
+categories: [ctf/htb/starting-point/tier-0/very-easy]
+tags: [RedOps, ctf, htb, starting point, writeup, very easy, telnet, meow]
 ---
 
 ![meow](/assets/img/ctf/htb/sp/tier0/meow/meow.PNG)
