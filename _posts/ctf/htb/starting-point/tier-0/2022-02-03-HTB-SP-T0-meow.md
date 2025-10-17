@@ -1,7 +1,7 @@
 ---
 title: "HTB Starting Point - Tier 0 - Meow"
 date: 2022-02-03 00:00:00 -0700
-categories: [RedOps, ctf, HTB]
+categories: [RedOps, htb]
 tags: [ctf, htb, RedOps, writeup, very_easy, telnet, meow]
 ---
 
