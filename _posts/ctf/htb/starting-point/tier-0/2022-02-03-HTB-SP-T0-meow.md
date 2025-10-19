@@ -2,7 +2,7 @@
 layout: post
 title: "HackTheBox - Starting Point - Tier 0 - Meow"
 date: 2022-02-03
-categories: [ RedOps, ctf, HTB ]
+categories: [ CTF, HackTheBox ]
 tags: [ RedOps, writeup, very easy, telnet, meow ]
 ---
 ![meow](/assets/img/ctf/htb/sp/tier0/meow/meow.PNG)
