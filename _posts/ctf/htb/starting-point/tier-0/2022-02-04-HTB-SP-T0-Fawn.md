@@ -2,8 +2,8 @@
 layout: post
 title: "HackTheBox - Starting Point - Tier 0 - Fawn"
 date: 2022-02-04
-categories: [ [, CTF, HackTheBox, ] ]
-tags: [ [RedOps, writeup, very_easy, ftp, fawn, ] ]
+categories: [ CTF, HackTheBox]
+tags: [RedOps, writeup, very easy, ftp,fawn]
 ---
 ![fawn](/assets/img/ctf/htb/sp/tier0/fawn/fawn.PNG)
 

@@ -2,8 +2,8 @@
 layout: post
 title: "HackTheBox - Starting Point - Tier 0 - Dancing"
 date: 2022-02-07
-categories: [ [, CTF, HackTheBox] ]
-tags: [ [RedOps, writeup, very_easy, smb, dancing, ] ]
+categories: [ CTF, HackTheBox]
+tags: [RedOps, writeup, very easy, smb, dancing] 
 ---
 
 ![dancing](/assets/img/ctf/htb/sp/tier0/dancing/dancing.PNG)
