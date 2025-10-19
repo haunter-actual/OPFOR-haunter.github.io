@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HTB Starting Point - Tier 1 - Pennywoth"
+title: "HackTheBox - Starting Point - Tier 1 - Pennywoth"
 date: 2022-03-10
-categories: [ RedOps, ctf, HTB ]
-tags: [ ctf, htb, RedOps, writeup, very_easy, pennyworth, reverseshell, bruteforce, msf ]
+categories: [ CTF, HackTheBox ]
+tags: [ RedOps, writeup, very easy, pennyworth, reverseshell, bruteforce, msf ]
 ---
 ![pennyworth](/assets/img/ctf/htb/sp/tier1/pennyworth/pennyworth.PNG)
 

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HTB Starting Point - Tier 1 - Ignition"
+title: "HackTheBox - Starting Point - Tier 1 - Ignition"
 date: 2022-03-02
-categories: [ RedOps, ctf, HTB ]
-tags: [ ctf, htb, RedOps, writeup, very_easy, ignition, bruteforce ]
+categories: [ CTF, HackTheBox ]
+tags: [ RedOps, writeup, very easy, ignition, bruteforce ]
 ---
 ![ignition](/assets/img/ctf/htb/sp/tier1/ignition/ignition.PNG)
 

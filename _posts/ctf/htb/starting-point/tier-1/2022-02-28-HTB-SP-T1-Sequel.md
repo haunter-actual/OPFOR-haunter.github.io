@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HTB Starting Point - Tier 1 - Sequel"
+title: "HackTheBox - Starting Point - Tier 1 - Sequel"
 date: 2022-02-28
-categories: [ RedOps, ctf, HTB, sql ]
-tags: [ ctf, htb, RedOps, writeup, very_easy, sequel, sql, mysql ]
+categories: [ CTF, HackTheBox, sql ]
+tags: [ RedOps, writeup, very easy, sequel, sql, mysql ]
 ---
 ![sequel](/assets/img/ctf/htb/sp/tier1/sequel/sequel.PNG)
 

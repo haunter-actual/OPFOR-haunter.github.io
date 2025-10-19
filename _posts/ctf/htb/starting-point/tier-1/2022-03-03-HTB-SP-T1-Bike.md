@@ -2,8 +2,8 @@
 layout: post
 title: "HTB Starting Point - Tier 1 - Bike"
 date: 2022-03-03
-categories: [ RedOps, ctf, HTB ]
-tags: [ ctf, htb, RedOps, writeup, very_easy, bike, ssti, injection, proxy, burpsuite ]
+categories: [ CTF, HackTheBox ]
+tags: [ RedOps, writeup, very easy, bike, ssti, injection, proxy, burpsuite ]
 ---
 ![bike](/assets/img/ctf/htb/sp/tier1/bike/bike.PNG)
 
