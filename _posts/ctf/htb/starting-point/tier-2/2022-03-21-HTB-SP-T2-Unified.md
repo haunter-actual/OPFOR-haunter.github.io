@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "HTB Starting Point - Tier 2 - "
-date: 2022-03-22
-categories: [ RedOps, ctf, HTB ]
-tags: [ ctf, htb, RedOps, writeup, easy ]
+title: "HackTheBox - Starting Point - Tier 2 - Unified"
+date: 2022-03-21
+categories: [ CTF, HackTheBox ]
+tags: [ RedOps, writeup, easy, unified ]
 ---
-![.PNG](/assets/img/ctf/htb/sp/tier2/.PNG)
+![unified](/assets/img/ctf/htb/sp/tier2/unified/unified.PNG)
 
 ## Introduction
 
@@ -17,7 +17,7 @@ tags: [ ctf, htb, RedOps, writeup, easy ]
    2. <br/>          
    3. <br/>
    4. <br/>
-   5. <figure>![.gif](/assets/img/ctf/htb/sp/tier2/.gif) <figcaption></figcaption></figure>                                     
+   5. <figure>![unified](/assets/img/ctf/htb/sp/tier2/unified/unified.gif) <figcaption></figcaption></figure>                                     
 </details>      
 
 
