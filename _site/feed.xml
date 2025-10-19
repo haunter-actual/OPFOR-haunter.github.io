@@ -3,8 +3,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://haunter-actual.github.io/</id>
   <title>./OpposingForce</title>
-  <subtitle>haunter's SecOps blog focused on offensive security methods, CTF writeups, &amp; cybersecurity in general</subtitle>
-  <updated>2025-10-01T08:21:30-07:00</updated>
+  <subtitle>haunter's SecOps blog focused on offensive security / red team / pentesting methodology, CTF writeups, &amp; cybersecurity in general</subtitle>
+  <updated>2025-10-19T07:40:35-07:00</updated>
   <author>
     <name>haunter</name>
     <uri>https://haunter-actual.github.io/</uri>
@@ -17,6 +17,144 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>HackTheBox - Cicada</title>
+    <link href="https://haunter-actual.github.io/posts/cicada/" rel="alternate" type="text/html" title="HackTheBox - Cicada" />
+    <published>2025-10-02T15:42:59-07:00</published>
+  
+    <updated>2025-10-19T06:30:29-07:00</updated>
+  
+    <id>https://haunter-actual.github.io/posts/cicada/</id>
+    <content type="text/html" src="https://haunter-actual.github.io/posts/cicada/" />
+    <author>
+      <name>haunter</name>
+    </author>
+
+  
+    
+    <category term="ctf" />
+    
+    <category term="htb" />
+    
+  
+
+  <summary>Initial Intel    Difficulty: Easy   OS: Windows   Active Directory   tl;dr Spoilers * enumerate SMB, get file from HR share to claim a password * enumerate users either via SMB or LDAP   Attack Path  Recon  Service Enumeration  Let’s start off with a basic TCP scan. If we can’t find anything we can later run a UDP scan.  # set host &amp;amp; initiate a standard tcp scan export cicada=10.10.11.35 su...</summary>
+
+  </entry>
+
+  
+  <entry>
+    <title>HTB Starting Point - Tier 0 - Explosion</title>
+    <link href="https://haunter-actual.github.io/posts/HTB-SP-T0-Explosion/" rel="alternate" type="text/html" title="HTB Starting Point - Tier 0 - Explosion" />
+    <published>2022-02-08T00:00:00-08:00</published>
+  
+    <updated>2025-10-19T07:36:25-07:00</updated>
+  
+    <id>https://haunter-actual.github.io/posts/HTB-SP-T0-Explosion/</id>
+    <content type="text/html" src="https://haunter-actual.github.io/posts/HTB-SP-T0-Explosion/" />
+    <author>
+      <name>haunter</name>
+    </author>
+
+  
+    
+    <category term="RedOps" />
+    
+    <category term="ctf" />
+    
+    <category term="HTB" />
+    
+  
+
+  <summary>Introduction  Explosion is the 4th 5th system (HTB keeps adding new machines) in the Tier 0 list, and the 1st of 2 VIP machines. RDP is the service theme here.  tl;dr                                                                                          Spoiler!                                                                                                                                     ...</summary>
+
+  </entry>
+
+  
+  <entry>
+    <title>HTB Starting Point - Tier 0 - Dancing</title>
+    <link href="https://haunter-actual.github.io/posts/HTB-SP-T0-Dancing/" rel="alternate" type="text/html" title="HTB Starting Point - Tier 0 - Dancing" />
+    <published>2022-02-07T00:00:00-08:00</published>
+  
+    <updated>2025-10-19T07:36:25-07:00</updated>
+  
+    <id>https://haunter-actual.github.io/posts/HTB-SP-T0-Dancing/</id>
+    <content type="text/html" src="https://haunter-actual.github.io/posts/HTB-SP-T0-Dancing/" />
+    <author>
+      <name>haunter</name>
+    </author>
+
+  
+    
+    <category term="RedOps" />
+    
+    <category term="ctf" />
+    
+    <category term="HTB" />
+    
+  
+
+  <summary>Introduction  Dancing is the host we are targeting this time. It looks like SMB will be the theme of the day.  tl;dr                                                                                          Spoiler!                                                                                                                                                                        1. SMB shares a...</summary>
+
+  </entry>
+
+  
+  <entry>
+    <title>HTB Starting Point - Tier 0 - Fawn</title>
+    <link href="https://haunter-actual.github.io/posts/HTB-SP-T0-Fawn/" rel="alternate" type="text/html" title="HTB Starting Point - Tier 0 - Fawn" />
+    <published>2022-02-04T00:00:00-08:00</published>
+  
+    <updated>2025-10-19T07:36:25-07:00</updated>
+  
+    <id>https://haunter-actual.github.io/posts/HTB-SP-T0-Fawn/</id>
+    <content type="text/html" src="https://haunter-actual.github.io/posts/HTB-SP-T0-Fawn/" />
+    <author>
+      <name>haunter</name>
+    </author>
+
+  
+    
+    <category term="RedOps" />
+    
+    <category term="ctf" />
+    
+    <category term="HTB" />
+    
+  
+
+  <summary>Introduction  Fawn is the second in the Tier 0 Starting Point machines. This is another educational system, so I will cover the commands in-depth than I will in future machines, but will build off knowledge from the previous machine, Meow.  tl;dr    Spoiler!      1. `FTP` to target.   2. username "anonymous".    3. `GET` flag to localhost.   4. ????   5. ![fawn](/assets/img/ctf/htb/sp/tier0/faw...</summary>
+
+  </entry>
+
+  
+  <entry>
+    <title>HackTheBox Starting Point</title>
+    <link href="https://haunter-actual.github.io/posts/HTB-Starting-Point/" rel="alternate" type="text/html" title="HackTheBox Starting Point" />
+    <published>2022-02-02T00:00:00-08:00</published>
+  
+    <updated>2025-10-19T07:36:25-07:00</updated>
+  
+    <id>https://haunter-actual.github.io/posts/HTB-Starting-Point/</id>
+    <content type="text/html" src="https://haunter-actual.github.io/posts/HTB-Starting-Point/" />
+    <author>
+      <name>haunter</name>
+    </author>
+
+  
+    
+    <category term="RedOps" />
+    
+    <category term="ctf" />
+    
+    <category term="HTB" />
+    
+  
+
+  <summary>Starting Point premiered on HTB in 2020 as an introductory path to pentesting. You can find the release article here.  Tier     Tier 0   Tier 1   Tier 2</summary>
+
+  </entry>
 
 </feed>
 
