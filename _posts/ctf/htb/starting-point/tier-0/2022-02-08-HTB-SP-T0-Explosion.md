@@ -1,21 +1,9 @@
 ---
 layout: post
-title: HTB Starting Point - Tier 0 - Explosion
+title: "HTB Starting Point - Tier 0 - Explosion"
 date: 2022-02-08
-categories:
-- RedOps
-- ctf
-- HTB
-tags:
-- ctf
-- htb
-- RedOps
-- writeup
-- very_easy
-- explosion
-- rdp
-- xfreerdp
-- windows
+categories: [ RedOps, ctf, HTB ]
+tags: [ ctf, htb, RedOps, writeup, very_easy, explosion, rdp, xfreerdp, windows ]
 ---
 ![explosion](/assets/img/ctf/htb/sp/tier0/explosion/explosion.PNG)
 

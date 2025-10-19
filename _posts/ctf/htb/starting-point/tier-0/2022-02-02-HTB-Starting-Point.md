@@ -1,16 +1,9 @@
 ---
 layout: post
-title: HackTheBox Starting Point
+title: "HackTheBox Starting Point"
 date: 2022-02-02
-categories:
-- RedOps
-- ctf
-- HTB
-tags:
-- ctf
-- htb
-- RedOps
-- writeup
+categories: [ RedOps, ctf, HTB ]
+tags: [ ctf, htb, RedOps, writeup ]
 ---
 ![sp_logo](/assets/img/ctf/htb/sp/sp_logo.jpg)
 

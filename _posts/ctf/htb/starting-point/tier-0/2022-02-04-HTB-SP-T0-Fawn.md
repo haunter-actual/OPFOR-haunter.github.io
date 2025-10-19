@@ -1,19 +1,9 @@
 ---
 layout: post
-title: HTB Starting Point - Tier 0 - Fawn
+title: "HTB Starting Point - Tier 0 - Fawn"
 date: 2022-02-04
-categories:
-- RedOps
-- ctf
-- HTB
-tags:
-- ctf
-- htb
-- RedOps
-- writeup
-- very_easy
-- ftp
-- fawn
+categories: [ RedOps, ctf, HTB ]
+tags: [ ctf, htb, RedOps, writeup, very_easy, ftp, fawn ]
 ---
 ![fawn](/assets/img/ctf/htb/sp/tier0/fawn/fawn.PNG)
 
