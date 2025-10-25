@@ -110,7 +110,7 @@ So, how can we further leverage this vector for a foothold? Let's review some in
 
 Whenever LFI is possible AND we know SSH is enabled, we should always try to get SSH keys. Let's try to get Daniel's.
 
-[SSH Key](/assets/img/ctf/very-easy/markup/9.png)
+[SSH Key](/assets/img/ctf/htb/very-easy/markup/9.png)
 
 Nice, we were able to get their key. Pop that into a local id_rsa file and remember to change the permissions!
 
