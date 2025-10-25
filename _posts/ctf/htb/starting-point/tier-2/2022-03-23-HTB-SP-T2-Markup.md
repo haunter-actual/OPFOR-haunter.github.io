@@ -5,7 +5,7 @@ categories: [CTF,HackTheBox]
 tags: [windows, XML External Entities (XXE / XEE), LFI, Winodws PrivEsc, Service Binary Hijacking ]
 ---
 
-![Markup](/assets/img/ctf/htb/vert-easy/markup/1.png)
+![Markup](/assets/img/ctf/htb/very-easy/markup/1.png)
 
 # Initial Intel
 * Difficulty: Very Easy
