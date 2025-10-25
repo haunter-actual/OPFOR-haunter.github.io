@@ -16,8 +16,8 @@ tags: [windows, XML External Entities (XXE / XEE), LFI, Winodws PrivEsc, Service
 * default creds to get into the webapp</br>
 * View page source for a username & XXE vector<br/>
 * Use Burspuite to intercept and edit the XML sent to the webapp <br/>
-* use XXE to LFI the known user's SSH key
-* SSH as user and enumerate C:\Log-Management for an editable .bat file
+* use XXE to LFI the known user's SSH key<br/>
+* SSH as user and enumerate C:\Log-Management for an editable .bat file<br/>
 * transfer nc over and edit the .bat file to get admin shell
 </details>
 
@@ -51,32 +51,31 @@ I don't see any exploits available based off this info. I'll enumerate the webap
 
 Navigating in-browser to the app gets us a login Page. I run ferox buster to enum any directories, pages, or files in the meantime:
 
-[Webapp Login](/assets/img/ctf/htb/very-easy/markup/2.png)
+![Webapp Login](/assets/img/ctf/htb/very-easy/markup/2.png)
 
 ```bash
 feroxbuster --url $markup --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do 
-
 ```
 
 But this doesn't seem to reveal anything interseting. I also viewed the HTML source for version or other interesting information, but couldn't find anything.
 
 Next thing I'll try is to use default creds. My goto is always admin:password and it works right off the bat.
 
-[Logged in](/assets/img/ctf/htb/very-easy/markup/3.png)
+![Logged in](/assets/img/ctf/htb/very-easy/markup/3.png)
 
 First, I'll walk the app and explore each tab, making sure to view source for each and test any interactive features.
 
-[Order Page](/assets/img/ctf/htb/very-easy/markup/4_0.png)
+![Order Page](/assets/img/ctf/htb/very-easy/markup/4_0.png)
 
 The order page has the only discernable feature that 'does something' when the form is submitted. A popup appears when any values are entered. This page warrants a closer look by viewing the source:
 
-[Order page source](/assets/img/ctf/htb/very-easy/markup/4.png)
+![Order page source](/assets/img/ctf/htb/very-easy/markup/4.png)
 
 A name is mentioned. I'll note that down for future enumeration.
 
 Futher down in the source we can see that the form is submitting XML data. This could be vulnerable to XML External Entities attackes if the server does not have proper protections in place:
 
-[Order page source - XML](/assets/img/ctf/htb/very-easy/markup/5.png)
+![Order page source - XML](/assets/img/ctf/htb/very-easy/markup/5.png)
 
 ### XML External Entity (XXE / XEE) Abuse
 
@@ -84,17 +83,17 @@ Did some reading here: <a href="https://angelica.gitbook.io/hacktricks/pentestin
 
 After launching Burpsuite and starting Intercept:
 
-[Capturing the XML data](/assets/img/ctf/htb/very-easy/markup/6.png)
+![Capturing the XML data](/assets/img/ctf/htb/very-easy/markup/6.png)
 
 1. I turned on my proxy in-browser
 2. Fill in dummy data
 3. Submit 
 
-[Intercept](/assets/img/ctf/htb/very-easy/markup/7.png)
+![Intercept](/assets/img/ctf/htb/very-easy/markup/7.png)
 
 Once we've captured the XML, send it to the repeater for manipulation.
 
-[XXE / XEE Exploit](/assets/img/ctf/htb/very-easy/markup/8.png)
+![XXE / XEE Exploit](/assets/img/ctf/htb/very-easy/markup/8.png)
 
 1. The external entity is defined here. NOTE: for Windows paths, forward slashes seem to work, whereas backslashes do not.
 2. We need to insert the entity object inside an existing data object. The 'payload' object defined is inserted here with a prefix '&' and a suffix ';'
@@ -110,7 +109,7 @@ So, how can we further leverage this vector for a foothold? Let's review some in
 
 Whenever LFI is possible AND we know SSH is enabled, we should always try to get SSH keys. Let's try to get Daniel's.
 
-[SSH Key](/assets/img/ctf/htb/very-easy/markup/9.png)
+![SSH Key](/assets/img/ctf/htb/very-easy/markup/9.png)
 
 Nice, we were able to get their key. Pop that into a local id_rsa file and remember to change the permissions!
 
@@ -130,7 +129,6 @@ Microsoft Windows [Version 10.0.17763.107]
 (c) 2018 Microsoft Corporation. All rights reserved.
 
 daniel@MARKUP C:\Users\daniel>
-
 ```
 
 Foothold established as user daniel.
