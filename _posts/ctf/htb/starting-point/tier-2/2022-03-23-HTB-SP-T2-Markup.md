@@ -1,25 +1,24 @@
 ---
-title: "HackTheBox - Easy - Cicada"
-date: 2024-10-15 15:42:59 -0700
+title: "HackTheBox - Very Easy - Markup"
+date: 2022-03-22 15:42:59 -0700
 categories: [CTF,HackTheBox]
-tags: [windows, easy, active directory, smb, ldap, winrm, password spray, privileged groups, SeBackupPrivilege, Backup Operators]
+tags: [windows, XML External Entities (XXE / XEE), LFI, Winodws PrivEsc, Service Binary Hijacking ]
 ---
 
-![Cicada](/assets/img/ctf/htb/easy/cicada/1.png)
+![Markup](/assets/img/ctf/htb/vert-easy/markup/1.png)
 
 # Initial Intel
-* Difficulty: Easy
-* OS: Windows
-* Active Directory
+* Difficulty: Very Easy
 
 # tl;dr
 <details><summary>Spoilers</summary>
-* enumerate SMB, get file from HR share to claim a password<br/>
-* enumerate users either via SMB or LDAP</br>
-* Password spray to get a matching username/password credential<br/>
-* Re-enumerate SMB with new user for additional user info
-* Check LDAP info with Bloodhound. A user can remote in and is part of a special group
-* Lookup that privilege group's exploitable privileges to get administrator hash
+* SSH and a webserver on :80 are active<br/>
+* default creds to get into the webapp</br>
+* View page source for a username & XXE vector<br/>
+* Use Burspuite to intercept and edit the XML sent to the webapp <br/>
+* use XXE to LFI the known user's SSH key
+* SSH as user and enumerate C:\Log-Management for an editable .bat file
+* transfer nc over and edit the .bat file to get admin shell
 </details>
 
 # Attack Path
@@ -32,11 +31,11 @@ Let's start off with a basic TCP scan. If we can't find anything we can later ru
 
 ```bash
 # set host & initiate a standard tcp scan
-export cicada=10.10.11.35
-sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $cicada
+sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $markup
 ```
 
-We see quite a few services. DNS, Kerberos, SMB, and LDAP tell us this is Active Directory and likely a Domain Controller.
+Looks like SSH and a webserver (TCP 80 & 443) are both available.
+
 
 ```bash
 # Services
