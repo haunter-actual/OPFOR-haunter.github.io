@@ -155,7 +155,7 @@ I navigated to the last remaining interesting artifact: /mini.php
 
 Ah yeah, we have an psuedo-webshell. Looks like we can upload/delete files to the webserver. There are a couple of things we could do here, but I'll try to upload a PHP revershell to get a foothold.
 
-I'll use [Pentestmonkey's PHP reverse shell](http://pentestmonkey.net/tools/php-reverse-shell)
+I'll use [Pentestmonkey's PHP reverse shell](https://pentestmonkey.net/tools/php-reverse-shell)
 
 Once downloaded I made changes to include my $attacker IP and port for my local listener.
 
