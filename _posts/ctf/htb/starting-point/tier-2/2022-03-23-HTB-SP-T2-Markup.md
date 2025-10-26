@@ -13,7 +13,7 @@ tags: [windows, XML External Entities (XXE / XEE), LFI, Winodws PrivEsc, Service
 # tl;dr
 <details><summary>Spoilers</summary>
 * SSH and a webserver on :80 are active<br/>
-* default creds to get into the webapp</br>
+* default creds to get into the webapp<br/>
 * View page source for a username & XXE vector<br/>
 * Use Burspuite to intercept and edit the XML sent to the webapp <br/>
 * use XXE to LFI the known user's SSH key<br/>
