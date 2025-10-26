@@ -1,14 +1,15 @@
 ---
 title: "Offsec - PG Play - FunBoxEasyEnum"
-date: 2025-10-26 12:00:00 -0700
+date: 2025-10-24 12:00:00 -0700
 categories: [CTF,Offsec]
-tags: [Linux ]
+tags: [Linux, phpmyadmin ]
 ---
 
 ![Markup](/assets/img/ctf/htb/very-easy/markup/1.png)
 
 # Initial Intel
-* Difficulty: Very Easy
+* Difficulty: Easy
+* OS: Linux
 
 # tl;dr
 <details><summary>Spoilers</summary>
@@ -31,11 +32,11 @@ Let's start off with a basic TCP scan. If we can't find anything we can later ru
 
 ```bash
 # set host & initiate a standard tcp scan
-┌──(haunter㉿kali)-[~/working/htb/very-easy/markup]
-└─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $markup
+┌──(haunter㉿kali)-[~/working/offsec/easy/FunBoxEasyEnum]
+└─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $funbox
 ```
 
-Looks like SSH and a webserver (TCP 80 & 443) are both available. 
+Looks like SSH and a webserver are both available. 
 
 
 ```bash
