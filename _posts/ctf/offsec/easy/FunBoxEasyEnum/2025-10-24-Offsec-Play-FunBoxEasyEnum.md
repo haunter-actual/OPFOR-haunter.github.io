@@ -14,9 +14,9 @@ tags: [Linux, webapp discovery, webshell, bruteforce, NOPASSWD, GTFOBins ]
 # tl;dr
 <details><summary>Spoilers</summary>
 * Enumerate the webapp for unique files, notably a page called 'mini.php'. It is a webshell<br/>
-* Either enter a command or upload a php rev shell to get a foothold
-* Enumerate other users on the system, then try to bruteforce their passwords with a tool such as nxc against ssh
-* Check sudo permissions, then check GTFOBins for a privEsc exploit
+* Either enter a command or upload a php rev shell to get a foothold<br/>
+* Enumerate other users on the system, then try to bruteforce their passwords with a tool such as nxc against ssh<br/>
+* Check sudo permissions, then check GTFOBins for a privEsc exploit<br/>
 </details>
 
 # Attack Path
