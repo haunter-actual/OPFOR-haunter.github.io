@@ -13,13 +13,10 @@ tags: [Linux, webapp discovery, webshell, bruteforce, NOPASSWD, GTFOBins ]
 
 # tl;dr
 <details><summary>Spoilers</summary>
-* SSH and a webserver on :80 are active<br/>
-* default creds to get into the webapp<br/>
-* View page source for a username & XXE vector<br/>
-* Use Burspuite to intercept and edit the XML sent to the webapp <br/>
-* use XXE to LFI the known user's SSH key<br/>
-* SSH as user and enumerate C:\Log-Management for an editable .bat file<br/>
-* transfer nc over and edit the .bat file to get admin shell
+* Enumerate the webapp for unique files, notably a page called 'mini.php'. It is a webshell<br/>
+* Either enter a command or upload a php rev shell to get a foothold
+* Enumerate other users on the system, then try to bruteforce their passwords with a tool such as nxc against ssh
+* Check sudo permissions, then check GTFOBins for a privEsc exploit
 </details>
 
 # Attack Path
