@@ -5,7 +5,7 @@ categories: [CTF,TryHackMe]
 tags: [windows, webapp]
 ---
 
-![Alfred](/assets/img/ctf/thm/easy/alfred.png)
+![Alfred](/assets/img/ctf/thm/easy/alfred/alfred.png)
 
 # Initial Intel
 * Difficulty: Easy
