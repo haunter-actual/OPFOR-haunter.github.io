@@ -104,7 +104,18 @@ by Ben "epi" Risher 🤓                 ver: 2.10.4
 
 Found *robots.txt* which unfortunately didn't have any intel of value.
 
+Since nothing else popped up with *feroxbuster*, I went back to the webserver stack to see if I could find anyhing exploitable. I used *Wappalyzer* and *whatweb*:
 
+```bash
+┌──(haunter㉿kali)-[~/working/thm/easy/Alfred]
+└─$ whatweb http://$alfred:8080
+http://10.201.11.17:8080 [403 Forbidden] Cookies[JSESSIONID.ee8d63dc], Country[RESERVED][ZZ], HTTPServer[Jetty(9.4.z-SNAPSHOT)], HttpOnly[JSESSIONID.ee8d63dc], IP[10.201.11.17], Jenkins[2.190.1], Jetty[9.4.z-SNAPSHOT], Meta-Refresh-Redirect[/login?from=%2F], Script, UncommonHeaders[x-content-type-options,x-hudson,x-jenkins,x-jenkins-session,x-you-are-authenticated-as,x-you-are-in-group-disabled,x-required-permission,x-permission-implied-by]
+http://10.201.11.17:8080/login?from=%2F [200 OK] Cookies[JSESSIONID.ee8d63dc], Country[RESERVED][ZZ], HTML5, HTTPServer[Jetty(9.4.z-SNAPSHOT)], HttpOnly[JSESSIONID.ee8d63dc], IP[10.201.11.17], Jenkins[2.190.1], Jetty[9.4.z-SNAPSHOT], PasswordField[j_password], Script[text/javascript], Title[Sign in [Jenkins]], UncommonHeaders[x-content-type-options,x-hudson,x-jenkins,x-jenkins-session,x-instance-identity], X-Frame-Options[sameorigin]
+```
+
+There are two web technologies that stand out:
+* Jenkins[2.190.1]
+* Jetty[9.4.z-SNAPSHOT]
 
 
 
