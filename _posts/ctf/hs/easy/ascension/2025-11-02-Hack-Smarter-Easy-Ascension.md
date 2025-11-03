@@ -2,7 +2,7 @@
 title: "Hack Smarter - Easy - Ascension"
 date: 2025-11-02 12:00:00 -0700
 categories: [CTF,Hack Smarter]
-tags: [linux]
+tags: [linux, nfs, rpc, bruteforce, mysql, capabilities]
 ---
 
 ![Ascension](/assets/img/ctf/hs/easy/ascension/ascension.png)
@@ -13,6 +13,15 @@ tags: [linux]
 
 # tl;dr
 <details><summary>Spoilers</summary>
+* Access FTP anonymously, get password list<br/>
+* mount NFS drive, get SSH keys<br/>
+* get username from public key, and crack the private key with rockyou.txt<br/>
+* SSH with the obtained SSH key and passphrase<br/>
+* enumerate the other users on the system<br/>
+* bruteforce FTP with the acquired users and the password list retrieved earlier<br/>
+* locate the MySQL creds in the website directory and access the DB<br/>
+* get the user creds from the DB. Another user's password is similar to the one found here.<br/>
+* Use linPEAS to enumerate file capabilities. There is a file in the last user's home dir that can be exploited to get root<br/>
 </details>
 
 # Attack Path
@@ -378,4 +387,6 @@ root@ip-10-1-39-71:~#
 ```
 
 # Lessons Learned
-
+* check /var/www for interesting files, such as config files that may contain DB creds or similar
+* file capabilies such as cap_setuid can be leveraged for privesc
+* Take password format into consideration. If user3 has password "user3password", then user2 may have "user2password" as their credential
