@@ -1,0 +1,2 @@
+# Nmap 7.94SVN scan initiated Wed Nov  5 15:47:10 2025 as: nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full 10.10.92.132
+Warning: Hit PCRE_ERROR_MATCHLIMIT when probing for service http with the regex '^HTTP/1\.1 \d\d\d (?:[^\r\n]*\r\n(?!\r\n))*?.*\r\nServer: Virata-EmWeb/R([\d_]+)\r\nContent-Type: text/html; ?charset=UTF-8\r\nExpires: .*<title>HP (Color |)LaserJet ([\w._ -]+)&nbsp;&nbsp;&nbsp;'
