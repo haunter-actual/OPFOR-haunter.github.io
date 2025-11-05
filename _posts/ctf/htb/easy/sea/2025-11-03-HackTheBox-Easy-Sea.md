@@ -149,6 +149,13 @@ Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-190-generic x86_64)
 
 ```
 
+Edit /etc/hosts
+127.0.0.1   attacker
+
+Navigate to http://attacker:9999 in browser
+
+Capture POST, edit variable and add bash command with URL encoding to get revshell.
+
 
 # Lessons Learned
 
