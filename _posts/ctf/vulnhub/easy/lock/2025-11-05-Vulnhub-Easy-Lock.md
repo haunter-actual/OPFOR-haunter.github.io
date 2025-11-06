@@ -52,6 +52,8 @@ PORT     STATE SERVICE       REASON          VERSION
 
 #### TCP/80 - Webserver
 
+![Webserver Landing Page](/assets/img/ctf/vulnhub/easy/lock/1.png)
+
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]          └─$ feroxbuster --url $lock --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
 
@@ -76,6 +78,9 @@ OS build: '20348'
 
 ```
 
+#### TCP/3000 - ???/Git
+
+![Gitea Landing Page](/assets/img/ctf/vulnhub/easy/lock/2.png)
 
 
 ## Foothold
