@@ -1,2 +1,170 @@
 # Nmap 7.94SVN scan initiated Wed Nov  5 15:47:10 2025 as: nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full 10.10.92.132
 Warning: Hit PCRE_ERROR_MATCHLIMIT when probing for service http with the regex '^HTTP/1\.1 \d\d\d (?:[^\r\n]*\r\n(?!\r\n))*?.*\r\nServer: Virata-EmWeb/R([\d_]+)\r\nContent-Type: text/html; ?charset=UTF-8\r\nExpires: .*<title>HP (Color |)LaserJet ([\w._ -]+)&nbsp;&nbsp;&nbsp;'
+Nmap scan report for 10.10.92.132
+Host is up, received echo-reply ttl 127 (0.17s latency).
+Scanned at 2025-11-05 15:47:11 PST for 434s
+Not shown: 65529 filtered tcp ports (no-response)
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT     STATE SERVICE       REASON          VERSION
+80/tcp   open  http          syn-ack ttl 127 Microsoft IIS httpd 10.0
+|_http-server-header: Microsoft-IIS/10.0
+|_http-favicon: Unknown favicon MD5: FED84E16B6CCFE88EE7FFAAE5DFEFD34
+|_http-title: Lock - Index
+| http-methods: 
+|   Supported Methods: OPTIONS TRACE GET HEAD POST
+|_  Potentially risky methods: TRACE
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+3000/tcp open  ppp?          syn-ack ttl 127
+| fingerprint-strings: 
+|   GenericLines, Help, RTSPRequest: 
+|     HTTP/1.1 400 Bad Request
+|     Content-Type: text/plain; charset=utf-8
+|     Connection: close
+|     Request
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Content-Type: text/html; charset=utf-8
+|     Set-Cookie: i_like_gitea=aecd55c5a26b607a; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=edYkhX--ffSk_yahMAMOjm5fDQc6MTc2MjM4NjczMjgyMTgxMjUwMA; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|     Date: Wed, 05 Nov 2025 23:52:12 GMT
+|     <!DOCTYPE html>
+|     <html lang="en-US" class="theme-auto">
+|     <head>
+|     <meta name="viewport" content="width=device-width, initial-scale=1">
+|     <title>Gitea: Git with a cup of tea</title>
+|     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiR2l0ZWE6IEdpdCB3aXRoIGEgY3VwIG9mIHRlYSIsInNob3J0X25hbWUiOiJHaXRlYTogR2l0IHdpdGggYSBjdXAgb2YgdGVhIiwic3RhcnRfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwLyIsImljb25zIjpbeyJzcmMiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9wbmciLCJzaXplcyI6IjU
+|   HTTPOptions: 
+|     HTTP/1.0 405 Method Not Allowed
+|     Allow: HEAD
+|     Allow: GET
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Set-Cookie: i_like_gitea=11df2cc6a0acf43e; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=ajmgKSQ4ye0rp061VgLWjfN-wb86MTc2MjM4NjczODcxOTg0OTMwMA; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|     Date: Wed, 05 Nov 2025 23:52:18 GMT
+|_    Content-Length: 0
+3389/tcp open  ms-wbt-server syn-ack ttl 127 Microsoft Terminal Services
+| ssl-cert: Subject: commonName=Lock
+| Issuer: commonName=Lock
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2025-11-04T23:44:34
+| Not valid after:  2026-05-06T23:44:34
+| MD5:   a122:3b09:3452:748d:6615:aef8:4813:20ad
+| SHA-1: 1fa0:cdde:4e35:e979:3e9e:7b1d:7f4d:0c9b:6d7b:b561
+| -----BEGIN CERTIFICATE-----
+| MIICzDCCAbSgAwIBAgIQdfDP1h/fhopMtqIbM/+O4TANBgkqhkiG9w0BAQsFADAP
+| MQ0wCwYDVQQDEwRMb2NrMB4XDTI1MTEwNDIzNDQzNFoXDTI2MDUwNjIzNDQzNFow
+| DzENMAsGA1UEAxMETG9jazCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+| AOAUdCBHOsu8RQWb87xLdPsTNKFzs6FIeNbb5DUkmWg22Ow0HXRw2pVq3wPGN+xO
+| +Nh1jlYwQo9es/hpm/4PPR/7cR9AzQPM00r7/S+/fWAnggtEnTXGS+ZU0NlkS36i
+| ZRqNZEa2Nxp+Zx3LqNFEg55zleAdFkA6W2R5oj9sBH+59ODJxEWXkNfwDjgKb31m
+| 73MdAvOeiUObUgkhrctPJAWMG/kIo8Nbceh2C9L+6VWO1/+FAxMNkeiAiqyBGrsn
+| 299V3X4pLbdj3KOpdveJUCbaeBRUR29pST638J5L4RYcJOhUdmvlf16GBbsyVk33
+| ZPj1HzBDXwpro0W/pMgABSECAwEAAaMkMCIwEwYDVR0lBAwwCgYIKwYBBQUHAwEw
+| CwYDVR0PBAQDAgQwMA0GCSqGSIb3DQEBCwUAA4IBAQA/Hcr+yliXOMiAh/ujO5S5
+| N8ZJkGtYOt1tA4osdLiw6L+mDMISU+gYYdOamcU7NvxrpRt7sJveLTXDOR4mWG6c
+| 213ZEb1huL29sw+D40LHC79MzFlLDe4hwntRmZ9/8l+sa3qqkoApKvzKqMB4w3Z8
+| aUG2reV5qYQSKf6LsiZwWhqKtXQe30T6320a8/6jw8DKFC1FtcwUq+anf6EtrTro
+| Lxd78kE1IXWiEuBryDsnymu/wKCfDC28NPMsEXsTpk5UmFmFsqZgsnyf+6Yhc7fv
+| QE6rF2YE5tsKkVcKi5UYZx8F9HHmfrqbqLlZvPd+UZ3x8Eq0q6IQPyuv8GmAjwW5
+|_-----END CERTIFICATE-----
+|_ssl-date: 2025-11-05T23:54:24+00:00; 0s from scanner time.
+| rdp-ntlm-info: 
+|   Target_Name: LOCK
+|   NetBIOS_Domain_Name: LOCK
+|   NetBIOS_Computer_Name: LOCK
+|   DNS_Domain_Name: Lock
+|   DNS_Computer_Name: Lock
+|   Product_Version: 10.0.20348
+|_  System_Time: 2025-11-05T23:53:47+00:00
+5357/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-title: Service Unavailable
+|_http-server-header: Microsoft-HTTPAPI/2.0
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-title: Not Found
+|_http-server-header: Microsoft-HTTPAPI/2.0
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port3000-TCP:V=7.94SVN%I=7%D=11/5%Time=690BE32C%P=x86_64-pc-linux-gnu%r
+SF:(GenericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x
+SF:20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Ba
+SF:d\x20Request")%r(GetRequest,1000,"HTTP/1\.0\x20200\x20OK\r\nCache-Contr
+SF:ol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\nCo
+SF:ntent-Type:\x20text/html;\x20charset=utf-8\r\nSet-Cookie:\x20i_like_git
+SF:ea=aecd55c5a26b607a;\x20Path=/;\x20HttpOnly;\x20SameSite=Lax\r\nSet-Coo
+SF:kie:\x20_csrf=edYkhX--ffSk_yahMAMOjm5fDQc6MTc2MjM4NjczMjgyMTgxMjUwMA;\x
+SF:20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20SameSite=Lax\r\nX-Frame-Opt
+SF:ions:\x20SAMEORIGIN\r\nDate:\x20Wed,\x2005\x20Nov\x202025\x2023:52:12\x
+SF:20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang=\"en-US\"\x20class=\"the
+SF:me-auto\">\n<head>\n\t<meta\x20name=\"viewport\"\x20content=\"width=dev
+SF:ice-width,\x20initial-scale=1\">\n\t<title>Gitea:\x20Git\x20with\x20a\x
+SF:20cup\x20of\x20tea</title>\n\t<link\x20rel=\"manifest\"\x20href=\"data:
+SF:application/json;base64,eyJuYW1lIjoiR2l0ZWE6IEdpdCB3aXRoIGEgY3VwIG9mIHR
+SF:lYSIsInNob3J0X25hbWUiOiJHaXRlYTogR2l0IHdpdGggYSBjdXAgb2YgdGVhIiwic3Rhcn
+SF:RfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwLyIsImljb25zIjpbeyJzcmMiOiJodHRwO
+SF:i8vbG9jYWxob3N0OjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9w
+SF:bmciLCJzaXplcyI6IjU")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\n
+SF:Content-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r
+SF:\n\r\n400\x20Bad\x20Request")%r(HTTPOptions,197,"HTTP/1\.0\x20405\x20Me
+SF:thod\x20Not\x20Allowed\r\nAllow:\x20HEAD\r\nAllow:\x20GET\r\nCache-Cont
+SF:rol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\nS
+SF:et-Cookie:\x20i_like_gitea=11df2cc6a0acf43e;\x20Path=/;\x20HttpOnly;\x2
+SF:0SameSite=Lax\r\nSet-Cookie:\x20_csrf=ajmgKSQ4ye0rp061VgLWjfN-wb86MTc2M
+SF:jM4NjczODcxOTg0OTMwMA;\x20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20Sam
+SF:eSite=Lax\r\nX-Frame-Options:\x20SAMEORIGIN\r\nDate:\x20Wed,\x2005\x20N
+SF:ov\x202025\x2023:52:18\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPR
+SF:equest,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/
+SF:plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Re
+SF:quest");
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2022 (89%)
+OS fingerprint not ideal because: Missing a closed TCP port so results incomplete
+Aggressive OS guesses: Microsoft Windows Server 2022 (89%)
+No exact OS matches for host (test conditions non-ideal).
+TCP/IP fingerprint:
+SCAN(V=7.94SVN%E=4%D=11/5%OT=80%CT=%CU=%PV=Y%DS=2%DC=T%G=N%TM=690BE3B1%P=x86_64-pc-linux-gnu)
+SEQ(SP=103%GCD=1%ISR=10A%TI=I%II=I%SS=S%TS=A)
+OPS(O1=M4D4NW8ST11%O2=M4D4NW8ST11%O3=M4D4NW8NNT11%O4=M4D4NW8ST11%O5=M4D4NW8ST11%O6=M4D4ST11)
+WIN(W1=FFFF%W2=FFFF%W3=FFFF%W4=FFFF%W5=FFFF%W6=FFDC)
+ECN(R=Y%DF=Y%TG=80%W=FFFF%O=M4D4NW8NNS%CC=Y%Q=)
+T1(R=Y%DF=Y%TG=80%S=O%A=S+%F=AS%RD=0%Q=)
+T2(R=N)
+T3(R=N)
+T4(R=N)
+U1(R=N)
+IE(R=Y%DFI=N%TG=80%CD=Z)
+
+Uptime guess: 0.007 days (since Wed Nov  5 15:43:53 2025)
+Network Distance: 2 hops
+TCP Sequence Prediction: Difficulty=259 (Good luck!)
+IP ID Sequence Generation: Incremental
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+|_clock-skew: mean: 0s, deviation: 0s, median: 0s
+| smb2-time: 
+|   date: 2025-11-05T23:53:47
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+| p2p-conficker: 
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 48195/tcp): CLEAN (Timeout)
+|   Check 2 (port 32582/tcp): CLEAN (Timeout)
+|   Check 3 (port 35994/udp): CLEAN (Timeout)
+|   Check 4 (port 17536/udp): CLEAN (Timeout)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
+
+TRACEROUTE (using port 3389/tcp)
+HOP RTT       ADDRESS
+1   176.52 ms 10.8.0.1
+2   176.96 ms 10.10.92.132
+
+Read data files from: /usr/bin/../share/nmap
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed Nov  5 15:54:25 2025 -- 1 IP address (1 host up) scanned in 435.38 seconds
