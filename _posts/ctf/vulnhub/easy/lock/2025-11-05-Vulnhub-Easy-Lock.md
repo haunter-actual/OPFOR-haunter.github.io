@@ -470,7 +470,7 @@ Next, I entered *cmd.exe* in the top dir bar...
 
 ...and cmd opened as *NT Authority/SYSTEM*
 
-![PDF24 SYSTEM](/assets/img/ctf/vulnhub/easy/lock/25.png
+![PDF24 SYSTEM](/assets/img/ctf/vulnhub/easy/lock/25.png)
 
 After grabbing root.txt at c:\users\Administrator\Desktop\root.txt I completed Lock :)
 
