@@ -1,6 +1,6 @@
 ---
 title: "Offsec - PG Play - Easy - Amaterasu"
-date: 2025-11-08 12:00:00 -0000
+date: 2025-11-08 00:00:00 -0000
 categories: [CTF, offsec]
 tags: [linux]
 ---
@@ -39,7 +39,19 @@ PORT      STATE SERVICE REASON         VERSION
 
 Notable services:
 
-#### TCP/
+#### 21/TCP - FTP
+Anonymous is allowed. Could not list dir contents. No exploits found for version 3.0.3
+
+#### 25022/TCP - SSH
+No exploits found for OpenSSH 8.6. Need to enumerate usernames/passwords first.
+
+#### 33414/TCP - Unknown / Webserver
+
+Navigating to the port in-browser shows this is a webserver.
+
+![Webserver](/assets/img/ctf/offsec/easy/amaterasu/1.png)
+
+
 
 ## Foothold
 
