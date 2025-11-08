@@ -1,7 +1,7 @@
 ---
 title: "Offsec - PG Play - Easy - Amaterasu"
 date: 2025-11-08 00:00:00 -0700
-categories: [CTF, offsec]
+categories: [CTF, Offsec]
 tags: [linux]
 ---
 
@@ -51,7 +51,7 @@ Navigating to the port in-browser shows this is a webserver.
 
 ![Webserver](/assets/img/ctf/offsec/easy/amaterasu/1.png)
 
-Performed some webdiscovery:
+Performed some web discovery:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/offsec/easy/Amaterasu]
@@ -60,6 +60,8 @@ Performed some webdiscovery:
 200      GET        1l       14w       98c http://192.168.227.249:33414/info
 200      GET        1l       19w      137c http://192.168.227.249:33414/help
 ```
+
+Looks like we have an API we may be able to manipulate.
 
 ```bash
 http://192.168.227.249:33414/info
@@ -72,6 +74,25 @@ http://192.168.227.249:33414/help
 
 ["GET /info : General Info","GET /help : This listing","GET /file-list?dir=/tmp : List of the files","POST /file-upload : Upload files"]
 ```
+
+*GET /file-list?dir=/tmp* looks abusable, as does *POST /file-upload : Upload files*. I'll try to see if they are exploitable:
+
+![GET /file-list?dir=/tmp](/assets/img/ctf/offsec/easy/amaterasu/2.png)
+
+Nice. It looks like I can perform directory traversal and get some intel.
+
+![/home directory](/assets/img/ctf/offsec/easy/amaterasu/3.png)
+
+![/home/alfredo directory](/assets/img/ctf/offsec/easy/amaterasu/4.png)
+
+There's a user *alfredo*. I'll add him to a *users.txt* file.
+
+```bash
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/offsec/easy/Amaterasu]
+└─$ echo "alfredo" > users.txt
+```
+
+
 
 ## Foothold
 
