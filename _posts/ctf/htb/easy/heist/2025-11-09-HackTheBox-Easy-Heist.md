@@ -1,11 +1,11 @@
 ---
-title: "HackTheBox - Easy - Jerry"
+title: "HackTheBox - Easy - Heist"
 date: 2025-11-08 12:00:00 -0000
 categories: [CTF, HackTheBox]
 tags: [windows]
 ---
 
-![Jerry](/assets/img/ctf/htb/easy/jerry/jerry.png))
+![Heist](/assets/img/ctf/htb/easy/heist/heist.png))
 
 # Initial Intel
 * Difficulty: Easy

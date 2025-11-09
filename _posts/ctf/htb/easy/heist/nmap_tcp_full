@@ -1,0 +1,1 @@
+# Nmap 7.94SVN scan initiated Sun Nov  9 03:31:38 2025 as: nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full 10.10.10.149
