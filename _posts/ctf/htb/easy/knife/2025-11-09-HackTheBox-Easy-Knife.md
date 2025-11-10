@@ -2,10 +2,10 @@
 title: "HackTheBox - Easy - Knife"
 date: 2025-11-09 12:00:00 -0000
 categories: [CTF, HackTheBox]
-tags: [linux, web enum, NOPASSWD, sudo -l]
+tags: [linux, web enum, NOPASSWD, sudo -l, GTFObins]
 ---
 
-![HackTheBox Knife](/assets/img/ctf/htb/easy/knife/knife.png))
+![HackTheBox Knife](/assets/img/ctf/htb/easy/knife/knife.png)
 
 # Initial Intel
 * Difficulty: Easy
