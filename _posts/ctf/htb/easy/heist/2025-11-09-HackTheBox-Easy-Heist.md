@@ -1,5 +1,5 @@
 ---
-title: "HackTheBox - Easy - Heist"
+title: "HackTheBox - Windows - Easy - Heist"
 date: 2025-11-08 12:00:00 -0000
 categories: [CTF, HackTheBox]
 tags: [windows, web discovery, smb, winRM, memory dump, procdump]

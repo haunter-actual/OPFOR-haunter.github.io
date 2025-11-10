@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox -Starting Point - Tier 0 - Explosion"
+title: "HackTheBox -Starting Point - Tier 0 - Windows - Explosion"
 date: 2022-02-08
 categories: [ CTF, HackTheBox ] 
-tags: [ RedOps, writeup, very easy, explosion, rdp, xfreerdp, windows ] 
+tags: [ windows, writeup, very easy, explosion, rdp, xfreerdp] 
 ---
 ![explosion](/assets/img/ctf/htb/sp/tier0/explosion/explosion.PNG)
 

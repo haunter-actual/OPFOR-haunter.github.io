@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox - Starting Point - Tier 0 - Meow"
+title: "HackTheBox - Starting Point - Tier 0 - Linux - Meow"
 date: 2022-02-03
 categories: [ CTF, HackTheBox ]
-tags: [ RedOps, writeup, very easy, telnet, meow ]
+tags: [ linux, writeup, very easy, telnet, meow ]
 ---
 ![meow](/assets/img/ctf/htb/sp/tier0/meow/meow.PNG)
 
@@ -128,7 +128,8 @@ For a first try, always try `root`. We try it here, and success:
 
 Note: my flag is blurred out as `sharing a flag is frowned upon`, not because it's full of f-bombs or similar. 
 
-
+0242114B0E143F015F5D1E161713
+02375012182C1A1D751618034F36415408
 <figure>![derp-cat](/assets/img/ctf/htb/sp/tier0/meow/derp-cat.gif)<figcaption>OR IS IT?!</figcaption></figure>
 
 

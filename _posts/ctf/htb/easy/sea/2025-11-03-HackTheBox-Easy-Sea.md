@@ -1,5 +1,5 @@
 ---
-title: "HackTheBox - Easy - Sea"
+title: "HackTheBox - Linux - Easy - Sea"
 date: 2025-11-03 12:00:00 -0700
 categories: [CTF,HackTheBox]
 tags: [linux, web discovery, dirbust, burpsuite, RCE, XSS, reflected XSS, hash cracking]

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox - Starting Point - Tier 1 - Appointment"
+title: "HackTheBox - Starting Point - Tier 1 - Linux - Appointment"
 date: 2022-02-24
 categories: [ CTF, HackTheBox ]
-tags: [ RedOps, writeup, very easy, injection, sqli ]
+tags: [linux , writeup, very easy, injection, sqli ]
 ---
 ![appointment](/assets/img/ctf/htb/sp/tier1/appointment/appointment.PNG)
 

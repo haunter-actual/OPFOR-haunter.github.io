@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox - Starting Point - Tier 1 - Tactics"
+title: "HackTheBox - Starting Point - Tier 1 - Windows - Tactics"
 date: 2022-03-16
 categories: [ CTF, HackTheBox ]
-tags: [ RedOps, writeup, very easy, tactics, smb ]
+tags: [windows, writeup, very easy, smb ]
 ---
 ![tactics](/assets/img/ctf/htb/sp/tier1/tactics/tactics.PNG)
 

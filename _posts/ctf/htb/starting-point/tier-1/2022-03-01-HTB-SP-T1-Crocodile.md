@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox - Starting Point - Tier 1 - Crocodile"
+title: "HackTheBox - Starting Point - Tier 1 - Linux - Crocodile"
 date: 2022-03-01
 categories: [ CTF, HackTheBox ]
-tags: [ RedOps, writeup, very easy, crocodile, ftp, dirbust, gobuster ]
+tags: [ linux, writeup, very easy, crocodile, ftp, dirbust, gobuster ]
 ---
 ![crocodile](/assets/img/ctf/htb/sp/tier1/crocodile/crocodile.PNG)
 

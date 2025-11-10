@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "HackTheBox - Starting Point - Tier 1 - Bike"
+title: "HackTheBox - Starting Point - Tier 1 - Linux - Bike"
 date: 2022-03-03
 categories: [ CTF, HackTheBox ]
-tags: [ RedOps, writeup, very easy, bike, ssti, injection, proxy, burpsuite ]
+tags: [linux , writeup, very easy, bike, ssti, injection, proxy, burpsuite ]
 ---
 ![bike](/assets/img/ctf/htb/sp/tier1/bike/bike.PNG)
 

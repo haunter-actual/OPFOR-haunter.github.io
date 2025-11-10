@@ -1,5 +1,5 @@
 ---
-title: "HackTheBox - Very Easy - Markup"
+title: "HackTheBox - Windows - Very Easy - Markup"
 date: 2022-03-22 15:42:59 -0700
 categories: [CTF,HackTheBox]
 tags: [windows, XML External Entities (XXE / XEE), LFI, Winodws PrivEsc, Service Binary Hijacking ]
