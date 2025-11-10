@@ -1,5 +1,5 @@
 ---
-title: "TryHackMe - Easy - Alfred"
+title: "TryHackMe - Windows - Easy - Alfred"
 date: 2025-10-24 12:00:00 -0700
 categories: [CTF,TryHackMe]
 tags: [windows, webapp]

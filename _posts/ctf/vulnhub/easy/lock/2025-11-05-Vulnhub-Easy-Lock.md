@@ -1,5 +1,5 @@
 ---
-title: "Vulnlab - Easy - Lock"
+title: "Vulnlab - Windows - Easy - Lock"
 date: 2025-11-05 12:00:00 -0700
 categories: [CTF, Vulnlab]
 tags: [windows, git, gitea, dirbust, web discovery, rdp, mRemoteNG]

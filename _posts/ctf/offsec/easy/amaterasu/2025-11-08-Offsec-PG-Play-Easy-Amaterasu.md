@@ -1,5 +1,5 @@
 ---
-title: "Offsec - PG Play - Easy - Amaterasu"
+title: "Offsec - PG Play - Linux - Easy - Amaterasu"
 date: 2025-11-08 00:00:00 -0700
 categories: [CTF, Offsec]
 tags: [linux, webapp, path traversal, file upload, api, cron, suid]

@@ -1,5 +1,5 @@
 ---
-title: "Offsec - PG Play - Easy - FunBoxEasyEnum"
+title: "Offsec - PG Play - Linux - Easy - FunBoxEasyEnum"
 date: 2025-10-24 12:00:00 -0700
 categories: [CTF,Offsec]
 tags: [linux, webapp discovery, webshell, bruteforce, NOPASSWD, GTFOBins, linux privEsc ]

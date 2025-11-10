@@ -1,5 +1,5 @@
 ---
-title: "Hack Smarter - Easy - Ascension"
+title: "Hack Smarter - Linux - Easy - Ascension"
 date: 2025-11-02 12:00:00 -0700
 categories: [CTF,Hack Smarter]
 tags: [linux, nfs, rpc, bruteforce, mysql, capabilities]
