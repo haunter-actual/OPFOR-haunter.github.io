@@ -118,11 +118,11 @@ www/index.php
 www/logout.php
 ```
 
-![rysync copy](/assets/img/ctf/vulnhub/easy/sync/3.pmg)
-![rysync copy](/assets/img/ctf/vulnhub/easy/sync/4.pmg)
+![rysync copy](/assets/img/ctf/vulnhub/easy/sync/3.png)
+![rysync copy](/assets/img/ctf/vulnhub/easy/sync/4.png)
 
 
-![SQLite DB](/assets/img/ctf/vulnhub/easy/sync/5.pmg)
+![SQLite DB](/assets/img/ctf/vulnhub/easy/sync/5.png)
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync/attacker]  
