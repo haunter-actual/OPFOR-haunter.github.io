@@ -2,17 +2,17 @@
 title: "Vulnhub - Linux - Easy - Sync "
 date: 2025-11-10 16:00:00 -0000
 categories: [CTF]
-tags: [linux, easy, rsync]
+tags: [linux, easy, rsync, pspy, unshadow, SQLite, hashcrack, john]
 ---
 
-![Vulnlab Sync](/assets/img/ctf/vulnlab/easy/sync/sync.png))
+![Vulnlab Sync](/assets/img/ctf/vulnlab/easy/sync/sync.png)
 
 # Initial Intel
 * OS: Linux
 * Difficulty: Easy
 
 # tl;dr
-<details><summary>Spoilers</summary>i
+<details><summary>Spoilers</summary>
 * Use rsync to grab a copy of the website, including a DB with user hashes
 * crack one of the hashes with rockyou
 * enumerate FTP with the acquired creds. Hint: you are in a home directory and can write folders/files
