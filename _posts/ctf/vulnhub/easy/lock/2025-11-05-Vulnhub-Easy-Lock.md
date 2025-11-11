@@ -181,7 +181,7 @@ Date:   Wed Dec 27 11:36:39 2023 -0800
 
 Great, I found a *personal access token* that was removed in an earlier commit:
 
-![Git Personal Access Token](/assets/img/ctf/vullab/easy/lock/4.png)
+![Git Personal Access Token](/assets/img/ctf/vulnlab/easy/lock/4.png)
 
 We'll probably be able to use that to authenticate with the script in the repo somehow. Let's take a look at the script next.
 
