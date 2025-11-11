@@ -1,15 +1,15 @@
 ---
-title: ""
+title: " - Easy - "
 date: 2025-11-08 12:00:00 -0000
 categories: [CTF]
-tags: []
+tags: [,easy]
 ---
 
 ![](/assets/img/ctf/.png))
 
 # Initial Intel
-* Difficulty:
 * OS:
+* Difficulty: Easy
 
 # tl;dr
 <details><summary>Spoilers</summary>
@@ -28,7 +28,7 @@ Standard TCP scan to start:
 
 Notable services:
 
-#### TCP/
+#### /TCP - 
 
 ## Foothold
 
