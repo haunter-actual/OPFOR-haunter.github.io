@@ -25,7 +25,7 @@ Standard TCP scan to start:
 
 ```bash
 ┌──(haunter㉿kali)-[~/working/offsec/easy/potato/
-└─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $system
+└─$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full $potato
 ```
 
 Notable services:

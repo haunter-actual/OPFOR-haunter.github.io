@@ -2,7 +2,7 @@
 # create_ctf_post.sh
 # Creates working dirs and a Jekyll post .md file for a CTF writeup.
 # Behavior:
-#   - Always create directories that don't exist.
+#   - Always create directories that don't exist (including attacker/).
 #   - Create the post .md only if it does not already exist. If it exists, warn and skip.
 # Usage:
 #   ./create_ctf_post.sh                 # interactive prompts
@@ -76,7 +76,7 @@ fi
 
 # Normalizations
 PLATFORM_DIR="$(slugify "$PLATFORM_RAW")"          # e.g. offsec
-DIFFICULTY_DIR="$(slugify "$DIFFICULTY_RAW")"      # e.g. very-hard (for dir)
+DIFFICULTY_DIR="$(slugify "$DIFFICULTY_RAW")"      # e.g. very-hard (for dirs)
 SYSTEM_DIR="$(slugify "$SYSTEM_RAW")"              # e.g. bossman
 OS_TITLE="$(titlecase "$OS_RAW")"                  # Linux, Windows, AD
 DIFFICULTY_TITLE="$(titlecase "$DIFFICULTY_RAW")"  # Very Hard
@@ -84,20 +84,21 @@ SYSTEM_TITLE="$(titlecase "$SYSTEM_RAW")"          # Bossman
 PLATFORM_FULLNAME_TITLE="$PLATFORM_FULLNAME"       # OffSec PG Play
 
 # Tags should be lowercase; multi-word difficulties keep spaces (not hyphenated)
-OS_TAG="$(tr '[:upper:]' '[:lower:]' <<<"$OS_RAW")"           # linux
-DIFFICULTY_TAG="$(tr '[:upper:]' '[:lower:]' <<<"$DIFFICULTY_RAW")" # very hard
+OS_TAG="$(tr '[:upper:]' '[:lower:]' <<<"$OS_RAW")"
+DIFFICULTY_TAG="$(tr '[:upper:]' '[:lower:]' <<<"$DIFFICULTY_RAW")"
 
-# filename pieces (title-cased, hyphenated where desired)
+# filename pieces
 DATE_STR="$(date +%F)"
 PLATFORM_FULLNAME_HYPHENS="$(slugify_titlecase "$PLATFORM_FULLNAME_TITLE")"
 DIFFICULTY_TITLE_HYPHENS="$(slugify_titlecase "$DIFFICULTY_TITLE")"
 SYSTEM_FILENAME="$(slugify_titlecase "$SYSTEM_TITLE")"
 OS_FILENAME="$(slugify_titlecase "$OS_TITLE")"
 
-# Directory paths
+# Directory paths (including new attacker dir)
 DIR1="$HOME/working/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
 DIR2="$HOME/working/OpposingForce/haunter-actual.github.io/_posts/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
 DIR3="$HOME/working/OpposingForce/haunter-actual.github.io/assets/img/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
+DIR4="$HOME/working/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/attacker"
 
 POST_FILENAME="${DATE_STR}-${PLATFORM_FULLNAME_HYPHENS}-${OS_FILENAME}-${DIFFICULTY_TITLE_HYPHENS}-${SYSTEM_FILENAME}.md"
 POST_PATH="${DIR2%/}/$POST_FILENAME"
@@ -107,6 +108,7 @@ Will create (if missing):
   1) $DIR1
   2) $DIR2
   3) $DIR3
+  4) $DIR4
 
 Jekyll post target:
   $POST_PATH
@@ -122,7 +124,7 @@ if [[ -n "$answer" && ! $answer =~ [Yy] ]]; then
 fi
 
 # Create directories (always; ok if they already exist)
-mkdir -p "$DIR1" "$DIR2" "$DIR3"
+mkdir -p "$DIR1" "$DIR2" "$DIR3" "$DIR4"
 echo "Created directories (or they already existed)."
 
 # Create the post only if it doesn't already exist. If it exists, warn and continue.
@@ -161,7 +163,7 @@ Standard TCP scan to start:
 
 \`\`\`bash
 ┌──(haunter㉿kali)-[~/working/${PLATFORM_DIR}/${DIFFICULTY_DIR}/${SYSTEM_DIR}/
-└─\$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full \$system
+└─\$ sudo nmap -A -p- -vvv -T3 --open -oN nmap_tcp_full \$${SYSTEM_DIR}
 \`\`\`
 
 Notable services:
@@ -184,3 +186,4 @@ echo "Done. If needed, add an image at:"
 echo "  ${DIR3%/}/${SYSTEM_DIR}.png"
 echo "Edit the post at:"
 echo "  $POST_PATH"
+
