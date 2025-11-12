@@ -1,5 +1,5 @@
 ---
-title: "OffSec PG Play - Linux - Easy - Potato"
+title: "OffSec - PG Play - Linux - Easy - Potato"
 date: 2025-11-12 12:00:00 -0000
 categories: [CTF, OffSec PG Play]
 tags: [linux, easy]
