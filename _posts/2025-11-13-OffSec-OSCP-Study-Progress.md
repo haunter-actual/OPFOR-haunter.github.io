@@ -7,7 +7,7 @@ tags: [OffSec, OSCP, certificate]
 
 ![Offsec OSCP Logo](/assets/img/oscp.svg)
 
-# Challlenge System Progress
+# Challenge System Progress
 
  Combines Linux, Windows, & Active Directory Challenge Machines from TjNull & LainKusunagi's lists:
 
@@ -27,5 +27,5 @@ tags: [OffSec, OSCP, certificate]
 
 #### Active Directory
 
-<iframe  style='width:100% !important;height:100% overflow-x: scroll;' scrolling="yes" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=776557803&amp;single=true&amp;widget=true&amp;headers=true"></iframe>
+<iframe  style='width:100% !important;height:100% overflow-x: scroll;' scrolling="yes" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=776557803&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
 
