@@ -1,5 +1,5 @@
 ---
-title: "OffSec Offsensive Security Certified Professional (OSCP) Study Progress"
+title: "OffSec Offensive Security Certified Professional (OSCP) Study Progress"
 date: 2025-11-13 12:00:00 -0000
 categories: [Certification, OSCP]
 tags: [OffSec, OSCP, certificate]
@@ -15,5 +15,5 @@ tags: [OffSec, OSCP, certificate]
 
 * [LainKusunagi's List](https://docs.google.com/spreadsheets/d/18weuz_Eeynr6sXFQ87Cd5F0slOj9Z6rt/htmlview)
 
-<iframe stlye='width:100% !important!;overflow-x: scroll;'  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=219339819&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
+<iframe stlye='width:100% !important; overflow-x: scroll;' src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTDFNm5WpGz8o9JSi4bYV5Rp34cSlnKC-pAJzThoQnm1pJsPQp2A_ez8BdokErrGYBt2bos8YAh9AsD/pubhtml?gid=614131512&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
 
