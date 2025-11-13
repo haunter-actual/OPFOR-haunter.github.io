@@ -7,7 +7,7 @@ I am a blue team cybersecurity professional with a very diverse IT background ge
 
 Currently I have been studying for the OSCP exam. My third attempt study plan/progress can be found here:
 
-[haunter's OSCP Study Plan/Progress](https://haunter-actual.github.io/posts/OffSec-OSCP-Study-Progress/)
+[haunter's OSCP Study Plan & Progress](https://haunter-actual.github.io/posts/OffSec-OSCP-Study-Progress/)
 
 This site is focused on cybersecurity, including various ctf writeups, offensive security methodology, and other related things as I explore RedOps and become educated in offsensive security techniques and technologies. Feel free to reach out or connect with me. I can be readily found on Offsec's discord as well.
 
