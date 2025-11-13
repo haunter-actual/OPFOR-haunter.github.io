@@ -5,7 +5,7 @@ categories: [Certification, OSCP]
 tags: [OffSec, OSCP, certificate]
 ---
 
-<img alt='Offsec OSCP Logo' src='/assets/img/oscp.svg' style='width:25%;display:block;align:center;'/>
+<img alt='Offsec OSCP Logo' src='/assets/img/oscp.svg' style='width:25%;display:block;margin: 0 auto;'/>
 
 # Challenge System Progress
 
