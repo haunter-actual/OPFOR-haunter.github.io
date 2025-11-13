@@ -1,7 +1,7 @@
 ---
-title: "Vulnhub - Linux - Easy - Sync "
+title: "Vulnlab - Linux - Easy - Sync "
 date: 2025-11-10 16:00:00 -0000
-categories: [CTF]
+categories: [CTF, Vulnlab]
 tags: [linux, easy, rsync, pspy, unshadow, SQLite, hashcrack, john]
 ---
 
