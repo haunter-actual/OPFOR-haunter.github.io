@@ -71,7 +71,7 @@ StegSeek 0.6 - https://github.com/RickdeJager/StegSeek
 
 http://192.168.143.101/admin/
 
-![Admin login page](/assets/img/ctf/offsec/easy/potato/3.png)
+![Admin login page](/assets/img/ctf/offsec/easy/potato/2.png)
 
 I'll try to bruteforce this later if I can't find creds.
 
@@ -80,7 +80,14 @@ http://192.168.143.101/admin/logs/
 
 ![Admin logs](/assets/img/ctf/offsec/easy/potato/4.png)
 
+Log 1:
+![Log 1](/assets/img/ctf/offsec/easy/potato/5.1.png)
 
+Log 2:
+![Log 2](/assets/img/ctf/offsec/easy/potato/5.2.png)
+
+Log 3:
+![Log 3](/assets/img/ctf/offsec/easy/potato/5.3.png)
 
 #### 2121/TCP - FTP
 
