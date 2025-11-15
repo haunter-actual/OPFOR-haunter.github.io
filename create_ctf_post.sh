@@ -96,8 +96,8 @@ OS_FILENAME="$(slugify_titlecase "$OS_TITLE")"
 
 # Directory paths (including new attacker dir)
 DIR1="$HOME/working/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
-DIR2="$HOME/working/OpposingForce/haunter-actual.github.io/_posts/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
-DIR3="$HOME/working/OpposingForce/haunter-actual.github.io/assets/img/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
+DIR2="/opt/haunter-actual.github.io/_posts/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
+DIR3="/opt/haunter-actual.github.io/assets/img/ctf/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/"
 DIR4="$HOME/working/$PLATFORM_DIR/$DIFFICULTY_DIR/$SYSTEM_DIR/attacker"
 
 POST_FILENAME="${DATE_STR}-${PLATFORM_FULLNAME_HYPHENS}-${OS_FILENAME}-${DIFFICULTY_TITLE_HYPHENS}-${SYSTEM_FILENAME}.md"
