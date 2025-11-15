@@ -2,7 +2,7 @@
 title: "OffSec Offensive Security Certified Professional (OSCP) Study Plan & Progress"
 date: 2025-11-13 12:00:00 -0000
 categories: [Certification, OSCP]
-tags: [OffSec, OSCP, certificate]
+tags: [OffSec, OSCP]
 ---
 
 <img alt='Offsec OSCP Logo' src='/assets/img/oscp.svg' style='width:25%;display:block;margin: 0 auto;'/>
