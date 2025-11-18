@@ -6497,3 +6497,83 @@ From github.com:haunter-actual/haunter-actual.github.io
 error: cannot rebase: You have unstaged changes.
 error: Please commit or stash them.
 Already up to date.
+warning: in the working copy of 'autopush.log', CRLF will be replaced by LF the next time Git touches it
+[Tue Nov 18 12:30:03 PM PST 2025] Changes detected — committing...
+[main 4c1c809] Auto sync: 2025-11-18 12:30:03
+ 1 file changed, 14 insertions(+)
+[Tue Nov 18 12:30:03 PM PST 2025] Pushing to GitHub...
+To github.com:haunter-actual/haunter-actual.github.io.git
+   1c91954..4c1c809  main -> main
+[Tue Nov 18 12:30:05 PM PST 2025] Push complete.
+[Tue Nov 18 12:35:01 PM PST 2025] Starting auto-push...
+ERROR: no healthy upstream
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 12:40:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 12:45:01 PM PST 2025] Starting auto-push...
+ERROR: upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 12:50:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 12:55:01 PM PST 2025] Starting auto-push...
+ERROR: no healthy upstream
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:00:02 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:05:01 PM PST 2025] Starting auto-push...
+ERROR: no healthy upstream
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:10:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:15:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:20:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:25:01 PM PST 2025] Starting auto-push...
+ERROR: user:208180711:haunter-actual
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[Tue Nov 18 01:35:01 PM PST 2025] Starting auto-push...
+From github.com:haunter-actual/haunter-actual.github.io
+ * branch            main       -> FETCH_HEAD
+error: cannot rebase: You have unstaged changes.
+error: Please commit or stash them.
+Already up to date.
